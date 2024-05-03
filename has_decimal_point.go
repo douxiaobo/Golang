@@ -34,15 +34,28 @@ func main() {
 		}
 	}
 
-	var num float64
+	var result interface{}
 	if hasDecimalPoint {
-		fracPartF32 := float64(fracPart)
-		num = float64(intPart) + fracPartF32/math.Pow10(fracDigits) // 使用 math.Pow10 计算整数次幂
+		fracPartF64 := float64(fracPart)
+		result = float64(intPart) + fracPartF64/math.Pow10(fracDigits) // 使用 math.Pow10 计算整数次幂
 	} else {
-		num = float64(intPart)
+		if intPart > math.MaxInt32 {
+			fmt.Println("Overflow: intPart exceeds the max value of int64")
+			os.Exit(1)
+		}
+		result = int64(intPart)
 	}
 
-	fmt.Printf("num: %.6f\n", num)
+	// 分别处理打印逻辑
+	switch v := result.(type) {
+	case float64:
+		fmt.Printf("num: %.6f\n", v) // 控制浮点数输出的精度为6位小数
+	case int64:
+		fmt.Println("num:", v)
+	default:
+		fmt.Println("Unexpected result type")
+	}
+
 }
 
 // 主要变化如下：
