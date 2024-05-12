@@ -47,6 +47,7 @@ func main() {
 		return
 	}
 	defer conn.Close()
+	fmt.Printf("Connected by %s\n", conn.RemoteAddr().String())
 	for {
 		//接收
 		buffer := make([]byte, 1024)
@@ -68,7 +69,7 @@ func main() {
 		// msg = strings.TrimSpace(msg)
 		fmt.Printf("Message Received from client: %s\n", msg)
 
-		if msg == "byebye\n" { //接收了，其实上退出了，但是在Terminal上还没退出
+		if msg == "byebye\n" { //正常
 			fmt.Println("Client said goodbye.")
 			break
 		}
@@ -92,7 +93,7 @@ func main() {
 			return
 		}
 		fmt.Println("Message sent to client:", sendData)
-		if sendData == "byebye\n" { //发送，其实上退出了，但是在Terminal上还没退出
+		if sendData == "byebye\n" { //正常
 			fmt.Println("Server said goodbye.")
 			break
 		}
