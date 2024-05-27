@@ -16,7 +16,7 @@ func main() {
 	{{range .Name}}
 	{{.}},{{$.City}},是外国人
 	{{end}}
-	{{end}}`
+	{{end}}` //管道pipeline
 
 	str1 := []string{"小明", "小周"}
 	str2 := []string{"汤森", "佩斯"}
