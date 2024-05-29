@@ -3,12 +3,18 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"os"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
 func main() {
-	db, err := sql.Open("mysql", "root:root.@tcp(localhost:3306)/testdb?charset=utf8")
+	my_sql_password := os.Getenv("my_sql_password")
+	if my_sql_password == "" {
+		fmt.Println("my_sql_password enviroment variable is not, please set my_sql_password environment variable")
+		return
+	}
+	db, err := sql.Open("mysql", "root:"+my_sql_password+"@tcp(localhost:3306)/testdb?charset=utf8")
 	checkErr(err)
 	defer db.Close()
 	// stmt, err := db.Prepare("INSERT INTO employeetest(first_name,last_name,age,sex,income) VALUES(?,?,?,?,?)")	//OK
@@ -121,3 +127,5 @@ func checkErr(err error) {
 // 2 rows in set (0.00 sec)
 
 // OK
+
+// douxiaobo@192 go-sql-driver % export my_sql_password='root'
