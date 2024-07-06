@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>带汉堡菜单的网页</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* 内联CSS，用于测试路径问题 */
+        .hamburger { display: none; } /* 初始不显示 */
+    </style>
+</head>
+<body>
+    <div class="hamburger" onclick="toggleNav()">&#9776;</div>
+    <nav id="sidebar">
+        <ul>
+            <li><a href="#">Home</a></li>
+            <!-- 更多列表项 -->
+        </ul>
+    </nav>
+    <main>
+        <!-- 主内容区域 -->
+        <p>这里是主内容区域。</p>
+    </main>
+    <script src="script.js"></script>
+</body>
+</html>

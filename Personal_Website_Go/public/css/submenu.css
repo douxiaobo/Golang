@@ -1,0 +1,106 @@
+.horzbar{
+    display: none;
+    background-color: var(--bg);
+    width: 42px;
+    height: 42px;
+    text-align: left;
+    margin-bottom: 10px;
+    border-radius: 7px 7px 0px 0px;
+  }
+  
+  .ellipses  {
+    color: var(--dark);
+    font-size: 2rem;
+    line-height: 2rem;
+    overflow: hidden;
+    text-align: left;
+    background-color: var(--bg);
+  }
+  
+  .btnpagenav {
+    display: flex;
+    font-weight: 400;
+    margin-left: 20px;
+    color: var(--black);
+    cursor: pointer;
+    width: 200px;
+    text-align: left;
+    font-size: 1rem;
+    line-height: 1.2rem;
+    height: 56px;
+    border-bottom: 1px solid var(--bg);
+    overflow: hidden;
+  }
+  
+  .pagenav{
+    overflow: unset;
+  }
+  
+  .btnpagenav:hover {
+    background-color: var(--medium);
+    color: var(--bg);
+  }
+  
+  .btnpagenav.selected {
+    background-color: var(--black);
+    color: var(--bg);
+  }
+  
+  ul {
+    list-style-type: none;
+  }
+  
+  li a {
+    display: flex;
+    padding-left: 15px;
+    align-items: center;
+    height: 54px;
+    color: var(--black);
+    font-size: 1rem;
+    font-weight: 400;
+    background-color: var(--lite);
+    width: 100%;
+    text-align: left;
+    list-style: none;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  
+  li a:hover {
+    background-color: var(--hover);
+  }
+  
+  li a.selected {
+    background-color: var(--medium);
+    color: var(--bg);
+  }
+  
+  @media screen and (max-width: 880px) {
+    .pagenav {
+      position: absolute;
+      display: none;
+      margin-left: 5px;
+    }
+  
+    .btnpagenav{
+      margin-left: 0px;
+    }
+  
+    .showsub{
+      display: flex;
+      left: 10px;
+      top: 50px;
+      background-color: var(--bg);
+      -webkit-box-shadow: 5px 5px 16px -4px rgba(0,0,0,0.7); 
+      box-shadow: 5px 5px 16px -4px rgba(0,0,0,0.7);
+      z-index: 3;
+    }
+  
+    .horzbar{
+      display: block;
+    }
+  
+    main{
+      top: 57px;
+    }
+  }

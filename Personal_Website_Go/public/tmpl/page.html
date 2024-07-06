@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    {{template "httphead""" . }} <!-- the dot pass the url to sub template -->
+    <title>The Web Server</title>
+    <meta name="Description" content="Go has its own built in Apache or Nginx. Which means that it is both simpler and sometimes different.">
+  </head>
+
+  <body>
+    {{template "nav"}} <--- Top Navigation (Main Menu)
+    <main>
+      {{template "sub_build"}} <--- Side Navigation (Sub Menu)
+        <div class="content">
+          <div class="horzbar" onclick="showsub()"><h2 class="ellipses">&#x2026;</h2></div>
+          <div class="card">
+          <h1>About the Building process</h1>
+          <div class="line"></div>
+          <p>This site is built on four pillars.</p>
+          <p><strong>The main pillar is Go</strong> (or Golang). Not as common as it should be, but really simple. It replaces the need for Apache or Nginx (for a single website). It also serves all endpoints and some other stuff that normally is handled by PHP.</p> 
+          <p><strong>The second pillar is HTML templates</strong>. The Go HTML templates have a touch of Angular, but are way simpler, faster and smaller. The trick is to use "sub templates" in order to make it DRY (Do not Repeat Yourself). You can pass data from Go and between templates.</p> 
+          <p><strong>The third pillar is CSS</strong>. No extra presentation needed.<a href="drycss">Note the tips ton get the CSS more DRY</a></p> 
+          <p><strong>The fourth pillar is Vanilla Javascript</strong>. NOT JQuery. In my opinion jQuery slows down and makes it harder to understand. I have found that AJAX will make some pages render better and simplify many things</p> 
+          <p>This section is about how to build a site using Golang. The Go part is not big, but essential to the speed and simplicity.</p> 
+        </div>
+        </div>
+    </main>
+  </body>
+
+</html>
+
+{{define "sub_build"}}
+
+<div class="pagenav"> 
+  <ul data-mainnav="/build"> <--- the main menu that should be selected
+    <li class="btnpagenav"><a href="/build">Building</a></li>
+    <li class="btnpagenav"><a href="/server">1. Go Server</a></li>
+    <li class="btnpagenav"><a href="/navigation">2. Create Navigation</a></li>
+    <li class="btnpagenav"><a href="/pages">3. Create Pages</a></li>
+  </ul>
+</div>
+
+{{end}}
+
+{{define "nav}}
+
+<header>
+  <a class="logo" href="/home">goWebStatic</a>
+  <nav>
+    <a class="btnnav" href="why">Why?</a>
+    <a class="btnnav" href="prepare">Prepare</a>
+    <a class="btnnav" href="build">Build</a>
+    <a class="btnnav" href="deploy">Deploy</a>
+    <a class="btnnav" href="optimize">Optimize</a>
+    <a class="btnnav" href="extra">Extra</a>
+    <a class="btnnav" href="about">About</a>
+  </nav>
+  <a href="search">
+    <div class="search">
+      <img src="icn/search.svg" alt="Search this Site">
+    </div>
+  </a>
+  <img src="icn/hamburger.svg" class="hamburger" onclick="hamburger()" alt="Menu" />
+</header> 
+
+{{end}}    

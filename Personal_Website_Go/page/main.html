@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>主页面</title>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 加载菜单内容
+            loadContent('menu.html', 'menu');
+
+            // 假设有一个按钮用于加载正文内容
+            document.getElementById('loadContentButton').addEventListener('click', function() {
+                // 加载内容页面
+                loadContent('content1.html', 'content');
+            });
+        });
+
+        function loadContent(url, targetId) {
+            fetch(url)
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById(targetId).innerHTML = data.trim(); // 去除可能的空白字符
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    </script>
+</head>
+<body>
+    <div id="menu"></div> <!-- 菜单内容将在这里显示 -->
+    <button id="loadContentButton">加载正文内容</button>
+    <div id="content"></div> <!-- 正文内容将在这里显示 -->
+</body>
+</html>

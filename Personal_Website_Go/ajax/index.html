@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>动态加载内容示例</title>
+</head>
+<body>
+    <div id="submenu"></div> <!-- 子菜单容器 -->
+    <div id="content"></div>   <!-- 正文内容容器 -->
+
+    <script>
+        // 函数：加载并显示HTML内容
+        function loadContent(url, elementId) {
+            fetch(url)
+                .then(response => {
+                    if (response.ok) return response.text();
+                    throw new Error('Network response was not ok.');
+                })
+                .then(html => {
+                    document.getElementById(elementId).innerHTML = html;
+                })
+                .catch(error => {
+                    console.error('There has been a problem with your fetch operation:', error);
+                });
+        }
+
+        // 加载子菜单
+        loadContent('submenu.html', 'submenu');
+
+        // 加载正文内容
+        loadContent('content.html', 'content');
+    </script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>网页设计示例</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* 添加一些基本的样式 */
+        .nav-links {
+            display: none; /* 默认隐藏导航链接 */
+        }
+        .nav-links.show {
+            display: block; /* 显示导航链接 */
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>窦小波的个人网站</h1>
+        <button id="menuToggle">hamburger</button>
+    </header>
+    <nav>
+        <ul  class="nav-links">
+            <li><a href="#">首页</a></li>
+            <li><a href="#">关于我</a></li>
+            <li><a href="#">计算机</a></li>
+            <li><a href="#">音乐</a></li>
+            <li><a href="#">旅游</a></li>
+        </ul>
+    </nav>
+    <main>
+        <section class="master">
+            <h2>主区域内容</h2>
+            <p>这里是主区域的详细内容。</p>
+        </section>
+        <aside class="detail">
+            <h3>详情区域</h3>
+            <p>这里是详情区域的内容，可以包含一些补充信息或链接。</p>
+        </aside>
+    </main>
+    <script>
+        // JavaScript代码来实现汉堡菜单
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            var navLinks = document.querySelector('.nav-links');
+            if (navLinks.classList.contains('show')) {
+                navLinks.classList.remove('show');
+            } else {
+                navLinks.classList.add('show');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+body {
+    font-family: Arial, sans-serif;
+}
+
+header {
+    background-color: #f8f9fa;
+    padding: 10px;
+    text-align: center;
+}
+
+nav ul {
+    list-style-type: none;
+    padding: 0;
+    background-color: #333;
+    text-align: center;
+}
+
+nav ul li {
+    display: inline;
+}
+
+nav ul li a {
+    text-decoration: none;
+    color: white;
+    background-color: #333;
+    padding: 10px 20px;
+    display: inline-block;
+}
+
+nav ul li a:hover {
+    background-color: #555;
+}
+
+main {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+}
+
+.master {
+    flex: 3;
+}
+
+.detail {
+    flex: 1;
+    padding-left: 20px;
+    border-left: 1px solid #ccc;
+}
+
+/* styles.css */
+.nav-links {
+    display: none; /* 默认隐藏导航 */
+}
+
+.nav-links.show {
+    display: block; /* 或使用flex，grid等，根据需要调整 */
+}
+
+#menuToggle {
+    display: block; /* 按钮默认显示 */
+    cursor: pointer;
+    /* 可以根据需要添加更多样式 */
+}
+
+/* 当屏幕尺寸允许时显示导航 */
+@media screen and (min-width: 768px) { /* 举例，可根据实际需求调整 */
+    .nav-links {
+        display: flex;
+    }
+    #menuToggle {
+        display: none; /* 大屏幕下隐藏按钮 */
+    }
+}

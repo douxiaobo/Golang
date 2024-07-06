@@ -1,0 +1,116 @@
+.logo {
+    display: inline-flex;
+    margin-right: auto;
+    font-size: 1.4rem;
+    height: 55px;
+    padding-left: 10px;
+    line-height: 3rem;
+  }
+  
+  header {
+    position: fixed;
+    top: 0px;
+    display: flex;
+    justify-content: right;
+    align-items: center;
+    font-family: inherit;
+    color: var(--black);
+    flex-direction: row;
+    background-color: var(--bg);
+    padding: 0px 15px 0px 15px;
+    border-bottom: 1px solid var(--dark);
+    height: 56px;
+    width: 100%;
+    z-index: 10;
+    overflow: hidden;
+  }
+  
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .btnnav {
+    display: inline-block;
+    color: #111;
+    height: 55px;
+    padding: 16px 20px 0px 20px;
+    font-size: 1rem;
+    line-height: 1.5rem;
+    border: none;
+    text-decoration: none;
+    cursor: pointer;
+    background-color: transparent;
+  }
+  
+  .btnnav.selected {
+    background-color: var(--medium);
+    color: var(--bg);
+  }
+  
+  .dropdown {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .search {
+    display: inline-flex;
+    width: 56px;
+    height: 56px;
+  }
+  
+  .hamburger {
+    display: none;
+    width: 56px;
+    height: 56px;
+  }
+  
+  .btnnav:hover,
+  .hamgurger:hover,
+  .search:hover {
+    background-color: var(--lite);
+  }
+  
+  .shadow {
+    box-shadow: rgba(1, 1, 1, 0.5) 0px 1px 12px 0px;
+  }
+  
+  @media screen and (max-width: 880px) {
+    .hamburger {
+      display: block;
+    }
+  
+    nav.dropham {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: left;
+      background-color: #fff;
+      right: 15px;
+      position: fixed;
+      top: 56px;
+      width: 200px;
+      box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    }
+  
+    .btnnav {
+      height: 55px;
+      width: 100%;
+      text-align: left;
+    }
+  
+    .dropdown {
+      text-align: left;
+      height: 55px;
+      width: 100%;
+    }
+  
+    .dropdown-content {
+      min-width: 200px;
+    }
+  
+    nav {
+      display: none;
+    }
+  }
