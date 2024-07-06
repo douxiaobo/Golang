@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="{{ $.Lang }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ block "title" . }}默认标题{{ end }}</title>
+    <!-- 样式表链接、JavaScript文件等头部资源可以放在这里 -->
+</head>
+<body>
+    <header>
+        <!-- 全局导航栏或页头元素 -->
+    </header>
+
+    <main>
+        {{ block "main" . }}
+            <!-- 这里会被子模板的内容替换 -->
+        {{ end }}
+    </main>
+
+    <footer>
+        <!-- 页脚内容 -->
+    </footer>
+
+    <!-- 脚本等可以放在body底部 -->
+</body>
+</html>

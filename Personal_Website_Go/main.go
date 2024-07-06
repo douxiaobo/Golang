@@ -1,82 +1,76 @@
 package main
 
 import (
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 )
 
+var templates map[string]*template.Template
+
+func initTemplates() {
+	templates = make(map[string]*template.Template)
+	// templates["en"], _ = template.ParseFiles("public/tmpl/en/index.html")
+	// templates["zh"], _ = template.ParseFiles("public/tmpl/zh/index.html")
+	// templates["es"], _ = template.ParseFiles("public/tmpl/es/index.html")
+
+	var baseTemplate *template.Template
+	var err error
+	if baseTemplate, err = template.ParseFiles("public/tmpl/base.html"); err != nil {
+		log.Fatalf("Error parsing base template: %v", err)
+	}
+
+	for lang, path := range map[string]string{
+		"en": "public/tmpl/en/index.html",
+		"zh": "public/tmpl/zh/index.html",
+		"es": "public/tmpl/es/index.html",
+	} {
+		templates[lang] = template.Must(baseTemplate.Clone())
+		templates[lang], err = templates[lang].ParseFiles(path)
+		if err != nil {
+			log.Fatalf("Error parsing language template for %s: %v", lang, err)
+		}
+		templates[lang], err = templates[lang].ParseGlob("public/tmpl/*.html")
+		if err != nil {
+			log.Fatalf("Error parsing glob templates for %s: %v", lang, err)
+		}
+	}
+}
+
 func homeHandler(w http.ResponseWriter, r *http.Request) {
-	var lang = []string{"en", "zh", "es"}
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	// 读取Accept-Language头部
-	// acceptLanguage := r.Header.Get("Accept-Language")
+	acceptLanguage := r.Header.Get("Accept-Language")
 
-	// var langCode string
-
-	// langCode = strings.Split(acceptLanguage, ",")[0][:2]
-	langCode := strings.Split(r.Header.Get("Accept-Language"), ",")[0][:2]
-	// fmt.Println("Trying language", langCode)
-
-	found := false
-	for _, l := range lang {
-		if l == langCode {
-			found = true
-			break
-		}
-	}
-	if !found {
-		langCode = "en"
-	}
-
-	// dir, err := os.Getwd()
-	// if err != nil {
-	// 	log.Fatalf("Failed to get working directory: %v", err)
-	// }
-	// fmt.Println("Current Working Directory:", dir)
-
-	url := "public/tmpl/" + langCode + "/"
-	templates := []string{url + "index.html", url + "submenu.html", url + "content.html"}
-
-	// url := filepath.Join(dir, "public/tmpl/", langCode)
-	// 定义模板文件列表
-	// templates := []string{url + "/index.html", url + "/submenu.html", url + "/content.html"}
-	// fmt.Println(templates)
-	// templates := []string{
-	// 	filepath.Join(dir, "public/tmpl", langCode, "index.html"),
-	// 	filepath.Join(dir, "public/tmpl", langCode, "submenu.html"),
-	// 	filepath.Join(dir, "public/tmpl", langCode, "content.html"),
-	// }
-
-	// 验证模板文件是否存在
-	for _, file := range templates {
-		if _, err := os.Stat(file); os.IsNotExist(err) {
-			log.Fatalf("Template file %s not found.", file)
+	// 尝试找到最佳匹配的语言
+	for _, pref := range strings.Split(acceptLanguage, ",") {
+		// 只考虑前两个字符作为语言代码
+		langCode := strings.SplitN(pref, ";", 2)[0][:2]
+		if tmpl, ok := templates[langCode]; ok {
+			// 执行模板渲染
+			if err := tmpl.Execute(w, nil); err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			return
 		}
 	}
 
-	// fmt.Println(templates)
-
-	// 加载模板
-	tmpl := template.Must(template.ParseFiles(templates...))
-	fmt.Println("Loaded templates:", tmpl.Templates())
-
-	data := struct {
-		Title string
-	}{
-		Title: "我的主页",
-	}
-
-	if err := tmpl.ExecuteTemplate(w, templates[0], data); err != nil {
-		log.Printf("Error executing template: %v", err)
-		// http.Error(w, "Error executing template", http.StatusInternalServerError)
-		return
+	// 如果没有找到匹配的语言，则默认为英语
+	if tmpl, ok := templates["en"]; ok {
+		if err := tmpl.Execute(w, nil); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	} else {
+		// 如果连英语模板都没有，就返回一个错误
+		http.Error(w, "No template found", http.StatusInternalServerError)
 	}
 }
 
 func main() {
+	initTemplates()
 	http.HandleFunc("/", homeHandler)
 
 	//启动服务器

@@ -1,13 +1,8 @@
-{{ define "index" }}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ .Title }}</title>
-</head>
-<body>
-    {{ template "submenu" . }}
-    {{ template "content" . }}
-</body>
-</html>
+{{ define "title"}}我的主页{{ end }}
+
+{{ define "main"}}
+    <h1>欢迎来到我的主页</h1>
+    <!-- 具体页面内容 -->
 {{ end }}
+
+{{ template "base.html" . }}
