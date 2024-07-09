@@ -1,5 +1,7 @@
 {
-    "zh":["汉语","英语","西班牙语"],
-    "en":["Chinese","English","Spanish"],
-    "es":["Chino","Ingles","Español"]
+    "links": [
+        {"code": "zh", "name": "汉语"},
+        {"code": "en", "name": "English"},
+        {"code": "es", "name": "Español"}
+    ]
 }

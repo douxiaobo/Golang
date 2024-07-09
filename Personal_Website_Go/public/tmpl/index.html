@@ -7,6 +7,10 @@
         <header>{{.Title}}</header>
         <nav>{{.Menu}}</nav>
         <main></main>
-        <footer> {{ .Footer }}</footer>
+        <footer>
+            {{ range .FooterLinks }}
+                <a href="/{{.Code}}">{{.Name}}</a>
+            {{ end }}
+        </footer>
     </body>
 </html>

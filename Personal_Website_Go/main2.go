@@ -11,10 +11,10 @@ import (
 )
 
 type Website struct {
-	Language string
-	Title    string
-	Menu     string
-	Footer   string
+	Language    string
+	Title       string
+	Menu        string
+	FooterLinks []FooterLink
 }
 
 var user Website
@@ -37,11 +37,18 @@ type Menus struct {
 	Es []string `json:"es"`
 }
 
-type Footers struct {
-	Zh []string `json:"zh"`
-	En []string `json:"en"`
-	Es []string `json:"es"`
+// type Footers struct {
+// 	Zh []string `json:"zh"`
+// 	En []string `json:"en"`
+// 	Es []string `json:"es"`
+// }
+
+type FooterLink struct {
+	Code string `json:"code"` // 假设我们使用"code"作为JSON中的键，代表语言代码
+	Name string `json:"name"` // 假设我们使用"name"作为JSON中的键，代表语言名称
 }
+
+type FooterLinks []FooterLink
 
 func indexHandleFunc(w http.ResponseWriter, r *http.Request) {
 	// 从URL路径中获取语言后缀
@@ -102,18 +109,21 @@ func indexHandleFunc(w http.ResponseWriter, r *http.Request) {
 	// 根据语言获取Menu
 	user.Menu = getMenu(menus, user.Language)
 
-	titleData, err = ioutil.ReadFile("./public/json/Footer.json")
+	// 读取Footer.json文件
+	footerData, err := ioutil.ReadFile("./public/json/Footer.json")
 	if err != nil {
 		log.Fatalf("error reading file: %v", err)
 	}
-	// 解析JSON到Footers结构体
-	var footers Footers
-	err = json.Unmarshal(titleData, &footers)
+	// 解析JSON到新的Footers结构体
+	var footerJSON struct {
+		Links []FooterLink `json:"links"`
+	}
+	err = json.Unmarshal(footerData, &footerJSON)
 	if err != nil {
 		log.Fatalf("error unmarshalling json: %v", err)
 	}
-	// 根据语言获取Footer
-	user.Footer = getFooter(footers, user.Language)
+	// 将解析后的链接设置到user结构体中
+	user.FooterLinks = footerJSON.Links
 
 	t, err := template.ParseFiles("./public/tmpl/index.html")
 	if err != nil {
@@ -151,18 +161,18 @@ func getMenu(menus Menus, language string) string {
 	}
 }
 
-func getFooter(footers Footers, language string) string {
-	switch language {
-	case "zh":
-		return strings.Join(footers.Zh, ", ")
-	case "en":
-		return strings.Join(footers.En, ", ")
-	case "es":
-		return strings.Join(footers.Es, ", ")
-	default:
-		return "Footer"
-	}
-}
+// func getFooter(footers Footers, language string) string {
+// 	switch language {
+// 	case "zh":
+// 		return strings.Join(footers.Zh, ", ")
+// 	case "en":
+// 		return strings.Join(footers.En, ", ")
+// 	case "es":
+// 		return strings.Join(footers.Es, ", ")
+// 	default:
+// 		return "Footer"
+// 	}
+// }
 
 // 解析Accept-Language头部并返回最优先的语言
 func getLanguageFromHeader(header string) string {
