@@ -41,6 +41,17 @@ func indexHandleFunc(w http.ResponseWriter, r *http.Request) {
 	path := strings.TrimPrefix(r.URL.Path, "/")
 	lang := strings.Split(path, "/")[0]
 
+	// 如果URL中没有语言后缀，并且请求的是根路径，从Accept-Language头部获取
+	if lang == "" {
+		lang = getLanguageFromHeader(r.Header.Get("Accept-Language"))
+
+		// 如果找到了匹配的语言，执行重定向
+		if lang != "" {
+			http.Redirect(w, r, "/"+lang, http.StatusFound)
+			return
+		}
+	}
+
 	// 检查语言是否在支持的范围内
 	found := false
 	for _, supportedLang := range langrange {
@@ -51,14 +62,9 @@ func indexHandleFunc(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// 如果URL中没有语言后缀，从Accept-Language头部获取
+	// 如果没有找到匹配的语言，默认使用英语
 	if !found {
-		lang = getLanguageFromHeader(r.Header.Get("Accept-Language"))
-		if lang != "" {
-			user.Language = lang
-		} else {
-			user.Language = "en" // 如果没有找到匹配的语言，默认使用英语
-		}
+		user.Language = "en"
 	}
 
 	// 读取Title.json文件
