@@ -14,6 +14,7 @@ type Website struct {
 	Language string
 	Title    string
 	Menu     string
+	Footer   string
 }
 
 var user Website
@@ -31,6 +32,12 @@ type Titles struct {
 
 // 同样的结构体用于Menu.json
 type Menus struct {
+	Zh []string `json:"zh"`
+	En []string `json:"en"`
+	Es []string `json:"es"`
+}
+
+type Footers struct {
 	Zh []string `json:"zh"`
 	En []string `json:"en"`
 	Es []string `json:"es"`
@@ -95,39 +102,18 @@ func indexHandleFunc(w http.ResponseWriter, r *http.Request) {
 	// 根据语言获取Menu
 	user.Menu = getMenu(menus, user.Language)
 
-	// // 读取JSON文件
-	// data, err := ioutil.ReadFile("./public/json/Title.json")
-	// if err != nil {
-	// 	log.Fatalf("error reading file: %v", err)
-	// }
-	// // 解析JSON到LanguageMap
-	// var langMap LanguageMap
-	// err = json.Unmarshal(data, &langMap)
-	// if err != nil {
-	// 	log.Fatalf("error unmarshalling json: %v", err)
-	// }
-	// // 根据语言获取Title
-	// if text, ok := langMap[user.Language]; ok {
-	// 	user.Title = text
-	// } else {
-	// 	user.Title = "Homepage"
-	// 	log.Println("Language '%s' not found in JSON", user.Language)
-	// }
-
-	// data, err = ioutil.ReadFile("./public/json/Menu.json")
-	// if err != nil {
-	// 	log.Fatal("error reading file: %v", err)
-	// }
-	// err = json.Unmarshal(data, &langMap)
-	// if err != nil {
-	// 	log.Fatal("error unmarshalling json: %v", err)
-	// }
-	// if text, ok := langMap[user.Language]; ok {
-	// 	user.Menu = text
-	// } else {
-	// 	user.Menu = "Menu"
-	// 	log.Println("Language '%s' not found in JSON", user.Language)
-	// }
+	titleData, err = ioutil.ReadFile("./public/json/Footer.json")
+	if err != nil {
+		log.Fatalf("error reading file: %v", err)
+	}
+	// 解析JSON到Footers结构体
+	var footers Footers
+	err = json.Unmarshal(titleData, &footers)
+	if err != nil {
+		log.Fatalf("error unmarshalling json: %v", err)
+	}
+	// 根据语言获取Footer
+	user.Footer = getFooter(footers, user.Language)
 
 	t, err := template.ParseFiles("./public/tmpl/index.html")
 	if err != nil {
@@ -162,6 +148,19 @@ func getMenu(menus Menus, language string) string {
 		return strings.Join(menus.Es, ", ")
 	default:
 		return "Menu"
+	}
+}
+
+func getFooter(footers Footers, language string) string {
+	switch language {
+	case "zh":
+		return strings.Join(footers.Zh, ", ")
+	case "en":
+		return strings.Join(footers.En, ", ")
+	case "es":
+		return strings.Join(footers.Es, ", ")
+	default:
+		return "Footer"
 	}
 }
 
