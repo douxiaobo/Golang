@@ -2,15 +2,62 @@
 <html lang="{{.Language}}">
     <head>
 	    <title>{{.Title}}</title>
+        <style>
+            body, html {
+                margin: 0;
+                padding: 0;
+                height: 100%; /* 设置整个页面高度为100% */
+                display: flex;
+                flex-direction: column;
+                justify-content: center; /* 垂直居中 */
+                align-items: center; /* 水平居中 */
+            }
+            header, nav, main, footer {
+                width: 100%; /* 设置宽度为80%，可以根据需要调整 */
+                margin: 3px; /* 添加边距以区分各部分 */
+            }
+            header {
+                background-color: #f8f9fa; /* 可以设置背景颜色 */
+                height: 6%; /* 占据10%的高度 */
+                background-color: aqua;
+                display: flex;
+                justify-content: center; /* 新增：水平居中 */
+                align-items: center; /* 新增：垂直居中 */
+            }
+            nav {
+                height: 2.5%; /* 示例中给导航栏预留5%的高度 */
+                background-color: aquamarine;
+            }
+            main {
+                flex-grow: 1; /* main元素将填充剩余的空间 */
+                background-color: bisque;
+            }
+            footer {
+                height: 2.5%; /* footer同样占据10%的高度 */
+                background-color: blanchedalmond;
+                display: flex;
+                justify-content: center; /* 新增：水平居中 */
+                align-items: center; /* 新增：垂直居中 */
+            }
+            /* 使用Flexbox布局 */
+            body {
+                display: flex;
+                flex-direction: column;
+            }
+            .footer-link {
+                margin: 0 10px; /* 上下边距为0，左右边距为10px */
+            }
+        </style>
     </head>
     <body>
-        <header>{{.Title}}</header>
+        <header><h2>{{.Title}}</h2></header>
         <nav>{{.Menu}}</nav>
-        <main></main>
+        <main>{{.Content}}</main>
         <footer>
             {{ range .FooterLinks }}
-                <a href="/{{.Code}}">{{.Name}}</a>
+                <a class="footer-link" href="/{{.Code}}">{{.Name}}</a> 
             {{ end }}
+            <p>&copy; 2024 by Dou Xiaobo. All rights reserved.</p>
         </footer>
     </body>
 </html>

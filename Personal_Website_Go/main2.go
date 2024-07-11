@@ -14,6 +14,7 @@ type Website struct {
 	Language    string
 	Title       string
 	Menu        string
+	Content     string
 	FooterLinks []FooterLink
 }
 
@@ -37,6 +38,12 @@ type Menus struct {
 	Es []string `json:"es"`
 }
 
+type Contents struct {
+	Zh string `json:"zh"`
+	En string `json:"en"`
+	Es string `json:"es"`
+}
+
 // type Footers struct {
 // 	Zh []string `json:"zh"`
 // 	En []string `json:"en"`
@@ -50,18 +57,21 @@ type FooterLink struct {
 
 type FooterLinks []FooterLink
 
+var content_name string
+
 func indexHandleFunc(w http.ResponseWriter, r *http.Request) {
 	// 从URL路径中获取语言后缀
 	path := strings.TrimPrefix(r.URL.Path, "/")
 	lang := strings.Split(path, "/")[0]
 
 	// 如果URL中没有语言后缀，并且请求的是根路径，从Accept-Language头部获取
-	if lang == "" {
+	if lang == "" && content_name == "" {
 		lang = getLanguageFromHeader(r.Header.Get("Accept-Language"))
+		content_name = "home"
 
 		// 如果找到了匹配的语言，执行重定向
-		if lang != "" {
-			http.Redirect(w, r, "/"+lang, http.StatusFound)
+		if lang != "" && content_name != "" {
+			http.Redirect(w, r, "/"+lang+"/"+content_name, http.StatusFound)
 			return
 		}
 	}
@@ -125,6 +135,29 @@ func indexHandleFunc(w http.ResponseWriter, r *http.Request) {
 	// 将解析后的链接设置到user结构体中
 	user.FooterLinks = footerJSON.Links
 
+	// content_name := strings.Split(path, "/")[1]
+	// fmt.Println("content_name:", content_name) //Okay
+	// if content_name != "" {
+	// 	content_name = "home"
+	// 	if content_name != "" {
+	// 		http.Redirect(w, r, "/"+content_name, http.StatusFound)
+	// 		return
+	// 	}
+	// }
+
+	contentData, err := ioutil.ReadFile("./public/json/" + content_name + ".json")
+	if err != nil {
+		log.Fatal("error reading file: %v", err)
+	}
+	var contents Contents
+	err = json.Unmarshal(contentData, &contents)
+	if err != nil {
+		log.Fatalf("error unmarshalling json: %v", err)
+	}
+	user.Content = getContents(contents, user.Language)
+
+	// user.Content = "This is the homepage content."
+
 	t, err := template.ParseFiles("./public/tmpl/index.html")
 	if err != nil {
 		fmt.Println("template parsefile failed, error:", err)
@@ -143,7 +176,7 @@ func getTitle(titles Titles, language string) string {
 	case "es":
 		return titles.Es
 	default:
-		return "Homepage"
+		return "Title"
 	}
 }
 
@@ -158,6 +191,19 @@ func getMenu(menus Menus, language string) string {
 		return strings.Join(menus.Es, ", ")
 	default:
 		return "Menu"
+	}
+}
+
+func getContents(contents Contents, language string) string {
+	switch language {
+	case "zh":
+		return contents.Zh
+	case "en":
+		return contents.En
+	case "es":
+		return contents.Es
+	default:
+		return "Home"
 	}
 }
 
