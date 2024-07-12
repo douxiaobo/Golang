@@ -1,5 +1,7 @@
 package main
 
+//这个代码失败，作废
+
 import (
 	"encoding/json"
 	"fmt"
@@ -11,9 +13,9 @@ import (
 )
 
 type Website struct {
-	Language    string
-	Title       string
-	Menu        string
+	Language string
+	Title    string
+	// MenuLinks   []MenuLink
 	Content     string
 	FooterLinks []FooterLink
 }
@@ -32,11 +34,11 @@ type Titles struct {
 }
 
 // 同样的结构体用于Menu.json
-type Menus struct {
-	Zh []string `json:"zh"`
-	En []string `json:"en"`
-	Es []string `json:"es"`
-}
+// type Menus struct {
+// 	Zh []MenuLink `json:"zh"`
+// 	En []MenuLink `json:"en"`
+// 	Es []MenuLink `json:"es"`
+// }
 
 type Contents struct {
 	Zh string `json:"zh"`
@@ -57,113 +59,124 @@ type FooterLink struct {
 
 type FooterLinks []FooterLink
 
+// type MenuLink struct {
+// 	Name string `json:"name"`
+// 	link string `json:"link"`
+// }
+
 var content_name string
 
 func indexHandleFunc(w http.ResponseWriter, r *http.Request) {
-	// 从URL路径中获取语言后缀
-	path := strings.TrimPrefix(r.URL.Path, "/")
-	lang := strings.Split(path, "/")[0]
+	{
+		var lang string
 
-	// 如果URL中没有语言后缀，并且请求的是根路径，从Accept-Language头部获取
-	if lang == "" && content_name == "" {
-		lang = getLanguageFromHeader(r.Header.Get("Accept-Language"))
-		content_name = "home"
+		// 从URL路径中获取语言和内容名称
+		path := strings.TrimPrefix(r.URL.Path, "/")
+		pathParts := strings.Split(path, "/")
 
-		// 如果找到了匹配的语言，执行重定向
-		if lang != "" && content_name != "" {
-			http.Redirect(w, r, "/"+lang+"/"+content_name, http.StatusFound)
-			return
+		// 检查URL是否有足够的部分来解析语言和内容名称
+		if len(pathParts) >= 2 {
+			lang = pathParts[0]
+			content_name = pathParts[1]
+		} else {
+			// 如果URL中没有内容名称，从Accept-Language头部获取语言
+			lang = getLanguageFromHeader(r.Header.Get("Accept-Language"))
+			content_name = "home" // 默认内容名称
+
+			// 如果找到了匹配的语言，执行重定向
+			if lang != "" {
+				http.Redirect(w, r, "/"+lang+"/"+content_name, http.StatusFound)
+				return
+			}
+		}
+
+		// 检查语言是否在支持的范围内
+		found := false
+		for _, supportedLang := range langrange {
+			if lang == supportedLang {
+				user.Language = lang
+				found = true
+				break
+			}
+		}
+
+		// 如果没有找到匹配的语言，默认使用英语
+		if !found {
+			user.Language = "en"
 		}
 	}
 
-	// 检查语言是否在支持的范围内
-	found := false
-	for _, supportedLang := range langrange {
-		if lang == supportedLang {
-			user.Language = lang
-			found = true
-			break
+	{
+		// 读取Title.json文件
+		titleData, err := ioutil.ReadFile("./public/json/Title.json")
+		if err != nil {
+			log.Fatalf("error reading file: %v", err)
 		}
+		// 解析JSON到Titles结构体
+		var titles Titles
+		err = json.Unmarshal(titleData, &titles)
+		if err != nil {
+			log.Fatalf("error unmarshalling json: %v", err)
+		}
+		// 根据语言获取Title
+		user.Title = getTitle(titles, user.Language)
 	}
 
-	// 如果没有找到匹配的语言，默认使用英语
-	if !found {
-		user.Language = "en"
-	}
-
-	// 读取Title.json文件
-	titleData, err := ioutil.ReadFile("./public/json/Title.json")
-	if err != nil {
-		log.Fatalf("error reading file: %v", err)
-	}
-	// 解析JSON到Titles结构体
-	var titles Titles
-	err = json.Unmarshal(titleData, &titles)
-	if err != nil {
-		log.Fatalf("error unmarshalling json: %v", err)
-	}
-	// 根据语言获取Title
-	user.Title = getTitle(titles, user.Language)
-
-	// 读取Menu.json文件
-	menuData, err := ioutil.ReadFile("./public/json/Menu.json")
-	if err != nil {
-		log.Fatalf("error reading file: %v", err)
-	}
-	// 解析JSON到Menus结构体
-	var menus Menus
-	err = json.Unmarshal(menuData, &menus)
-	if err != nil {
-		log.Fatalf("error unmarshalling json: %v", err)
-	}
-	// 根据语言获取Menu
-	user.Menu = getMenu(menus, user.Language)
-
-	// 读取Footer.json文件
-	footerData, err := ioutil.ReadFile("./public/json/Footer.json")
-	if err != nil {
-		log.Fatalf("error reading file: %v", err)
-	}
-	// 解析JSON到新的Footers结构体
-	var footerJSON struct {
-		Links []FooterLink `json:"links"`
-	}
-	err = json.Unmarshal(footerData, &footerJSON)
-	if err != nil {
-		log.Fatalf("error unmarshalling json: %v", err)
-	}
-	// 将解析后的链接设置到user结构体中
-	user.FooterLinks = footerJSON.Links
-
-	// content_name := strings.Split(path, "/")[1]
-	// fmt.Println("content_name:", content_name) //Okay
-	// if content_name != "" {
-	// 	content_name = "home"
-	// 	if content_name != "" {
-	// 		http.Redirect(w, r, "/"+content_name, http.StatusFound)
-	// 		return
+	// {
+	// 	// 读取Menu.json文件
+	// 	menuData, err := ioutil.ReadFile("./public/json/Menu.json")
+	// 	if err != nil {
+	// 		log.Fatalf("error reading file: %v", err)
 	// 	}
+	// 	// 解析JSON到Menus结构体
+	// 	var menus Menus
+	// 	err = json.Unmarshal(menuData, &menus)
+	// 	if err != nil {
+	// 		log.Fatalf("error unmarshalling json: %v", err)
+	// 	}
+	// 	// 根据语言获取Menu
+	// 	user.MenuLinks = getMenuLinks(menus, user.Language)
 	// }
 
-	contentData, err := ioutil.ReadFile("./public/json/" + content_name + ".json")
-	if err != nil {
-		log.Fatal("error reading file: %v", err)
+	{
+		contentData, err := ioutil.ReadFile("./public/json/" + content_name + ".json")
+		if err != nil {
+			log.Fatal("error reading file: %v", err)
+		}
+		var contents Contents
+		err = json.Unmarshal(contentData, &contents)
+		if err != nil {
+			log.Fatalf("error unmarshalling json: %v", err)
+		}
+		user.Content = getContents(contents, user.Language)
 	}
-	var contents Contents
-	err = json.Unmarshal(contentData, &contents)
-	if err != nil {
-		log.Fatalf("error unmarshalling json: %v", err)
-	}
-	user.Content = getContents(contents, user.Language)
 
-	// user.Content = "This is the homepage content."
-
-	t, err := template.ParseFiles("./public/tmpl/index.html")
-	if err != nil {
-		fmt.Println("template parsefile failed, error:", err)
-		return
+	{
+		// 读取Footer.json文件
+		footerData, err := ioutil.ReadFile("./public/json/Footer.json")
+		if err != nil {
+			log.Fatalf("error reading file: %v", err)
+		}
+		// 解析JSON到新的Footers结构体
+		var footerJSON struct {
+			Links []FooterLink `json:"links"`
+		}
+		err = json.Unmarshal(footerData, &footerJSON)
+		if err != nil {
+			log.Fatalf("error unmarshalling json: %v", err)
+		}
+		// 将解析后的链接设置到user结构体中
+		user.FooterLinks = footerJSON.Links
 	}
-	t.Execute(w, user)
+
+	{
+		t, err := template.ParseFiles("./public/tmpl/index.html")
+		if err != nil {
+			fmt.Println("template parsefile failed, error:", err)
+			return
+		}
+		t.Execute(w, user)
+	}
 }
 
 // 获取标题
@@ -180,19 +193,19 @@ func getTitle(titles Titles, language string) string {
 	}
 }
 
-// 获取菜单
-func getMenu(menus Menus, language string) string {
-	switch language {
-	case "zh":
-		return strings.Join(menus.Zh, ", ")
-	case "en":
-		return strings.Join(menus.En, ", ")
-	case "es":
-		return strings.Join(menus.Es, ", ")
-	default:
-		return "Menu"
-	}
-}
+// // 获取菜单
+// func getMenuLinks(menus Menus, language string) []MenuLink {
+// 	switch language {
+// 	case "zh":
+// 		return menus.Zh
+// 	case "en":
+// 		return menus.En
+// 	case "es":
+// 		return menus.Es
+// 	default:
+// 		return []MenuLink{} // 返回空切片
+// 	}
+// }
 
 func getContents(contents Contents, language string) string {
 	switch language {
@@ -206,19 +219,6 @@ func getContents(contents Contents, language string) string {
 		return "Home"
 	}
 }
-
-// func getFooter(footers Footers, language string) string {
-// 	switch language {
-// 	case "zh":
-// 		return strings.Join(footers.Zh, ", ")
-// 	case "en":
-// 		return strings.Join(footers.En, ", ")
-// 	case "es":
-// 		return strings.Join(footers.Es, ", ")
-// 	default:
-// 		return "Footer"
-// 	}
-// }
 
 // 解析Accept-Language头部并返回最优先的语言
 func getLanguageFromHeader(header string) string {

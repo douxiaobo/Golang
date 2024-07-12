@@ -1,5 +1,32 @@
 {
-    "zh":["首页","关于我","工作经历","编程探索","旅游足迹","上学经历","音乐爱好","运动经历"],
-    "en":["Home","About Me","Work Experience","Programming Exploration","Travel Journey","School Experience","Music Hobby","Sport Experience"],
-    "es":["Inicio","Acerca de mi","Experiencia laboral","Exploración de programación","Trayecto de viaje","Experiencia educativa","Hobby de música","Experiencia deportiva"]
+    "zh": [
+        {"name": "首页", "link": "home"},
+        {"name": "关于我", "link": "about"},
+        {"name": "工作经历", "link": "work"},
+        {"name": "编程探索", "link": "programming"},
+        {"name": "旅游足迹", "link": "travel"},
+        {"name": "上学经历", "link": "school"},
+        {"name": "音乐爱好", "link": "music-hobby"},
+        {"name": "运动经历", "link": "sport"}
+    ],
+    "en": [
+        {"name": "Home", "link": "home"},
+        {"name": "About Me", "link": "about"},
+        {"name": "Work Experience", "link": "work"},
+        {"name": "Programming Exploration", "link": "programming"},
+        {"name": "Travel Journey", "link": "travel"},
+        {"name": "School Experience", "link": "school"},
+        {"name": "Music Hobby", "link": "music-hobby"},
+        {"name": "Sport Experience", "link": "sport"}
+    ],
+    "es": [
+        {"name": "Inicio", "link": "home"},
+        {"name": "Acerca de mi", "link": "about"},
+        {"name": "Experiencia laboral", "link": "work"},
+        {"name": "Exploración de programación", "link": "programming"},
+        {"name": "Trayecto de viaje", "link": "travel"},
+        {"name": "Experiencia educativa", "link": "school"},
+        {"name": "Hobby de música", "link": "music-hobby"},
+        {"name": "Experiencia deportiva", "link": "sport"}
+    ]
 }

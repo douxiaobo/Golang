@@ -51,12 +51,7 @@
     </head>
     <body>
         <header><h2>{{.Title}}</h2></header>
-        <!-- <nav>{{.Menu}}</nav> -->
-        <!-- <nav>
-            {{ range .MenuLinks }}
-                <a href="/{{.Code}}/{{.Name}}">{{.Name}}</a>
-            {{ end }}
-        </nav> -->
+        <nav>{{.Menu}}</nav>
         <main>{{.Content}}</main>
         <footer>
             {{ range .FooterLinks }}
@@ -64,5 +59,11 @@
             {{ end }}
             <p>&copy; 2024 by Dou Xiaobo. All rights reserved.</p>
         </footer>
+        <!-- <footer>
+            {{ range $code, $name := .Languages }}
+                <a class="footer-link" href="/{{$code}}/{{.User.ContentName}}">{{$name}}</a> 
+            {{ end }}
+            <p>&copy; 2024 by Dou Xiaobo. All rights reserved.</p>
+        </footer> -->
     </body>
 </html>
