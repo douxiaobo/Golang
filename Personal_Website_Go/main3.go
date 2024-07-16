@@ -58,39 +58,6 @@ type FooterLinks []FooterLink
 var content_name string
 
 func HandleFunc(w http.ResponseWriter, r *http.Request) {
-	// {
-	// 	// 从URL路径中获取语言后缀
-	// 	path := strings.TrimPrefix(r.URL.Path, "/")
-	// 	lang := strings.Split(path, "/")[0]
-
-	// 	// 如果URL中没有语言后缀，并且请求的是根路径，从Accept-Language头部获取
-	// 	if lang == "" && content_name == "" {
-	// 		lang = getLanguageFromHeader(r.Header.Get("Accept-Language"))
-	// 		content_name = "home"
-
-	// 		// 如果找到了匹配的语言，执行重定向
-	// 		if lang != "" && content_name != "" {
-	// 			http.Redirect(w, r, "/"+lang+"/"+content_name, http.StatusFound)
-	// 			return
-	// 		}
-	// 	}
-
-	// 	// 检查语言是否在支持的范围内
-	// 	found := false
-	// 	for _, supportedLang := range langrange {
-	// 		if lang == supportedLang {
-	// 			user.Language = lang
-	// 			found = true
-	// 			break
-	// 		}
-	// 	}
-
-	// 	// 如果没有找到匹配的语言，默认使用英语
-	// 	if !found {
-	// 		user.Language = "en"
-	// 	}
-	// }
-
 	{
 		// 从URL路径中获取语言后缀
 		path := strings.TrimPrefix(r.URL.Path, "/")
@@ -164,22 +131,42 @@ func HandleFunc(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("Error processing contents: %v", err)
 	}
 
+	user.FooterLinks, err = readAndParseFooterLinks()
+	if err != nil {
+		log.Fatal("Error processing footer links: %v", err)
+	}
+
 	// 根据语言获取Title
 	user.Title = getTitle(titles, user.Language)
 
 	// 根据语言获取Menu
 	user.Menu = getMenu(menus, user.Language)
 
-	user.FooterLinks = getFooterLinks()
-
 	user.Content = getContents(contents, user.Language)
+
+	// fmt.Printf("Footer Links: %+v\n", user.FooterLinks)
+	// fmt.Printf("Content Name: %s\n", user.ContentName)
 
 	t, err := template.ParseFiles("./public/tmpl/index1.html")
 	if err != nil {
 		fmt.Println("template parsefile failed, error:", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-	t.Execute(w, user)
+	err = t.Execute(w, map[string]interface{}{
+		"Title":       user.Title,
+		"Menu":        user.Menu,
+		"Content":     user.Content,
+		"ContentName": user.ContentName,
+		"User":        user,
+		"FooterLinks": user.FooterLinks,
+	})
+	if err != nil {
+		log.Println("Template execution error:", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
 }
 
 func readAndParseTitles() (Titles, error) {
@@ -242,6 +229,25 @@ func readAndParseContents(name string) (Contents, error) {
 	return contents, nil
 }
 
+func readAndParseFooterLinks() (FooterLinks, error) {
+	// 读取Footer.json文件
+	footerData, err := ioutil.ReadFile("./public/json/Footer.json")
+	if err != nil {
+		return nil, fmt.Errorf("error reading file: %w", err)
+	}
+
+	// 解析JSON到新的Footers结构体
+	var footerJSON struct {
+		Links []FooterLink `json:"links"`
+	}
+	err = json.Unmarshal(footerData, &footerJSON)
+	if err != nil {
+		return nil, fmt.Errorf("error unmarshalling json: %w", err)
+	}
+	// 返回解析后的链接
+	return footerJSON.Links, nil
+}
+
 // 获取标题
 func getTitle(titles Titles, language string) string {
 	switch language {
@@ -281,24 +287,6 @@ func getContents(contents Contents, language string) string {
 	default:
 		return "Content"
 	}
-}
-
-func getFooterLinks() []FooterLink {
-	// 读取Footer.json文件
-	footerData, err := ioutil.ReadFile("./public/json/Footer.json")
-	if err != nil {
-		log.Fatalf("error reading file: %v", err)
-	}
-	// 解析JSON到新的Footers结构体
-	var footerJSON struct {
-		Links []FooterLink `json:"links"`
-	}
-	err = json.Unmarshal(footerData, &footerJSON)
-	if err != nil {
-		log.Fatalf("error unmarshalling json: %v", err)
-	}
-	// 返回解析后的链接
-	return footerJSON.Links
 }
 
 // 解析Accept-Language头部并返回最优先的语言

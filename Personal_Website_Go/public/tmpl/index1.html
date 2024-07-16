@@ -54,16 +54,11 @@
         <nav>{{.Menu}}</nav>
         <main>{{.Content}}</main>
         <footer>
+            {{ $url:=.User.ContentName }}
             {{ range .FooterLinks }}
-                <a class="footer-link" href="/{{.Code}}">{{.Name}}</a> 
+                <a class="footer-link" href="/{{.Code}}/{{ $url }}">{{.Name}}</a> 
             {{ end }}
             <p>&copy; 2024 by Dou Xiaobo. All rights reserved.</p>
         </footer>
-        <!-- <footer>
-            {{ range $code, $name := .Languages }}
-                <a class="footer-link" href="/{{$code}}/{{.User.ContentName}}">{{$name}}</a> 
-            {{ end }}
-            <p>&copy; 2024 by Dou Xiaobo. All rights reserved.</p>
-        </footer> -->
     </body>
 </html>

@@ -6,7 +6,7 @@
         {"name": "编程探索", "link": "programming"},
         {"name": "旅游足迹", "link": "travel"},
         {"name": "上学经历", "link": "school"},
-        {"name": "音乐爱好", "link": "music-hobby"},
+        {"name": "音乐爱好", "link": "music"},
         {"name": "运动经历", "link": "sport"}
     ],
     "en": [
@@ -16,7 +16,7 @@
         {"name": "Programming Exploration", "link": "programming"},
         {"name": "Travel Journey", "link": "travel"},
         {"name": "School Experience", "link": "school"},
-        {"name": "Music Hobby", "link": "music-hobby"},
+        {"name": "Music Hobby", "link": "music"},
         {"name": "Sport Experience", "link": "sport"}
     ],
     "es": [
@@ -26,7 +26,7 @@
         {"name": "Exploración de programación", "link": "programming"},
         {"name": "Trayecto de viaje", "link": "travel"},
         {"name": "Experiencia educativa", "link": "school"},
-        {"name": "Hobby de música", "link": "music-hobby"},
+        {"name": "Hobby de música", "link": "music"},
         {"name": "Experiencia deportiva", "link": "sport"}
     ]
 }
