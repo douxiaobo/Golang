@@ -35,13 +35,6 @@ type Titles struct {
 	Es string `json:"es"`
 }
 
-// 同样的结构体用于Menu.json
-// type Menus struct {
-// 	Zh []string `json:"zh"`
-// 	En []string `json:"en"`
-// 	Es []string `json:"es"`
-// }
-
 type MenuLink struct {
 	Name string `json:"name"`
 	Link string `json:"link"`
@@ -76,15 +69,16 @@ func HandleFunc(w http.ResponseWriter, r *http.Request) {
 		if len(pathParts) >= 2 {
 			user.Language = pathParts[0]
 			user.ContentName = pathParts[1]
-		}
+		} else {
+			// 尝试从cookie中获取语言设置
+			cookie, err := r.Cookie(user.CookieName)
+			if err == nil && cookie.Value != "" {
+				user.Language = cookie.Value
+			} else if user.Language == "" {
+				// 如果cookie不存在或者URL中没有语言后缀，从Accept-Language头部获取
+				user.Language = getLanguageFromHeader(r.Header.Get("Accept-Language"))
 
-		// 尝试从cookie中获取语言设置
-		cookie, err := r.Cookie(user.CookieName)
-		if err == nil && cookie.Value != "" {
-			user.Language = cookie.Value
-		} else if user.Language == "" {
-			// 如果cookie不存在或者URL中没有语言后缀，从Accept-Language头部获取
-			user.Language = getLanguageFromHeader(r.Header.Get("Accept-Language"))
+			}
 		}
 
 		// 检查语言是否在支持的范围内
@@ -112,11 +106,6 @@ func HandleFunc(w http.ResponseWriter, r *http.Request) {
 			user.ContentName = "home" // 这里替换为你的默认内容名称
 		}
 
-		// 如果URL中没有语言后缀或内容名称，重定向到带有语言后缀和内容名称的URL
-		if user.Language == "" || user.ContentName == "" {
-			http.Redirect(w, r, "/"+user.Language+"/"+user.ContentName, http.StatusFound)
-			return
-		}
 	}
 
 	// 使用新函数读取并解析Title.json
@@ -150,9 +139,6 @@ func HandleFunc(w http.ResponseWriter, r *http.Request) {
 
 	user.Content = getContents(contents, user.Language)
 
-	// fmt.Printf("Footer Links: %+v\n", user.FooterLinks)
-	// fmt.Printf("Content Name: %s\n", user.ContentName)
-
 	t, err := template.ParseFiles("./public/tmpl/index1.html")
 	if err != nil {
 		fmt.Println("template parsefile failed, error:", err)
@@ -172,7 +158,6 @@ func HandleFunc(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-
 }
 
 func readAndParseTitles() (Titles, error) {
@@ -206,13 +191,6 @@ func readAndParseMenus() (Menus, error) {
 	if err != nil {
 		return Menus{}, fmt.Errorf("error reading file: %w", err)
 	}
-
-	// var menus Menus
-	// err = json.Unmarshal(menuData, &menus)
-	// if err != nil {
-	// 	return Menus{}, fmt.Errorf("error unmarshalling json: %w", err)
-	// }
-	// return menus, nil
 
 	type TempMenu struct {
 		Zh []MenuLink `json:"zh"`
@@ -292,23 +270,6 @@ func getTitle(titles Titles, language string) string {
 
 // 获取菜单
 func getMenu(menus Menus, language string) []MenuLink {
-	// switch language {
-	// case "zh":
-	// 	return strings.Join(menus.Zh, ", ")
-	// case "en":
-	// 	return strings.Join(menus.En, ", ")
-	// case "es":
-	// 	return strings.Join(menus.Es, ", ")
-	// default:
-	// 	return "Menu"
-	// }
-	// 	// 连接菜单项的名称
-	// names := make([]string, len(menuItems))
-	// for i, item := range menuItems {
-	// 	names[i] = item.Name
-	// }
-	// return strings.Join(names, ", ")
-
 	var menuItems []MenuLink
 	switch language {
 	case "zh":
@@ -339,15 +300,13 @@ func getContents(contents Contents, language string) string {
 
 // 解析Accept-Language头部并返回最优先的语言
 func getLanguageFromHeader(header string) string {
-	// 这里可以实现对Accept-Language头部的解析逻辑
-	// 注意，这可能涉及到质量因子(q-factor)的处理
-	// 为简化起见，这里仅返回第一个语言代码
-	parts := strings.Split(header, ",")
-	if len(parts) > 0 {
-		lang := strings.Split(parts[0], ";")[0]
+
+	langs := strings.Split(header, ",")
+	for _, lang := range langs {
+		trimmedLang := strings.TrimSpace(lang)
 		for _, supportedLang := range langrange {
-			if lang == supportedLang {
-				return lang
+			if strings.HasPrefix(trimmedLang, supportedLang) {
+				return supportedLang
 			}
 		}
 	}
