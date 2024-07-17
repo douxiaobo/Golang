@@ -15,7 +15,7 @@ import (
 type Website struct {
 	Language    string
 	Title       string
-	Menu        string
+	Menu        []MenuLink
 	Content     string
 	ContentName string
 	FooterLinks []FooterLink
@@ -36,10 +36,21 @@ type Titles struct {
 }
 
 // 同样的结构体用于Menu.json
+// type Menus struct {
+// 	Zh []string `json:"zh"`
+// 	En []string `json:"en"`
+// 	Es []string `json:"es"`
+// }
+
+type MenuLink struct {
+	Name string `json:"name"`
+	Link string `json:"link"`
+}
+
 type Menus struct {
-	Zh []string `json:"zh"`
-	En []string `json:"en"`
-	Es []string `json:"es"`
+	Zh []MenuLink `json:"zh"`
+	En []MenuLink `json:"en"`
+	Es []MenuLink `json:"es"`
 }
 
 type Contents struct {
@@ -55,16 +66,11 @@ type FooterLink struct {
 
 type FooterLinks []FooterLink
 
-var content_name string
-
 func HandleFunc(w http.ResponseWriter, r *http.Request) {
 	{
 		// 从URL路径中获取语言后缀
 		path := strings.TrimPrefix(r.URL.Path, "/")
 		pathParts := strings.Split(path, "/")
-
-		// 初始化Website结构体的ContentName字段
-		user.ContentName = "home" // 默认值
 
 		// 如果路径中有足够的部分，那么第一部分是语言，第二部分是内容名称
 		if len(pathParts) >= 2 {
@@ -102,8 +108,8 @@ func HandleFunc(w http.ResponseWriter, r *http.Request) {
 			Path:  "/",
 		})
 
-		if content_name == "" {
-			content_name = "home" // 这里替换为你的默认内容名称
+		if user.ContentName == "" {
+			user.ContentName = "home" // 这里替换为你的默认内容名称
 		}
 
 		// 如果URL中没有语言后缀或内容名称，重定向到带有语言后缀和内容名称的URL
@@ -126,7 +132,7 @@ func HandleFunc(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 读取内容的JSON文件
-	contents, err := readAndParseContents(content_name)
+	contents, err := readAndParseContents(user.ContentName)
 	if err != nil {
 		log.Fatalf("Error processing contents: %v", err)
 	}
@@ -190,7 +196,7 @@ func readAndParseTitles() (Titles, error) {
 }
 
 func readAndParseMenus() (Menus, error) {
-	menuFile, err := os.Open("./public/json/Menu1.json")
+	menuFile, err := os.Open("./public/json/Menu.json")
 	if err != nil {
 		return Menus{}, fmt.Errorf("error opening file: %w", err)
 	}
@@ -201,11 +207,33 @@ func readAndParseMenus() (Menus, error) {
 		return Menus{}, fmt.Errorf("error reading file: %w", err)
 	}
 
-	var menus Menus
-	err = json.Unmarshal(menuData, &menus)
-	if err != nil {
-		return Menus{}, fmt.Errorf("error unmarshalling json: %w", err)
+	// var menus Menus
+	// err = json.Unmarshal(menuData, &menus)
+	// if err != nil {
+	// 	return Menus{}, fmt.Errorf("error unmarshalling json: %w", err)
+	// }
+	// return menus, nil
+
+	type TempMenu struct {
+		Zh []MenuLink `json:"zh"`
+		En []MenuLink `json:"en"`
+		Es []MenuLink `json:"es"`
 	}
+
+	// 将JSON数据反序列化到临时结构体
+	var tempMenus TempMenu
+	err = json.Unmarshal(menuData, &tempMenus)
+	if err != nil {
+		return Menus{}, fmt.Errorf("解析JSON出错: %w", err)
+	}
+
+	// 将临时结构体转换为Menus结构体
+	menus := Menus{
+		Zh: tempMenus.Zh,
+		En: tempMenus.En,
+		Es: tempMenus.Es,
+	}
+
 	return menus, nil
 }
 
@@ -263,17 +291,37 @@ func getTitle(titles Titles, language string) string {
 }
 
 // 获取菜单
-func getMenu(menus Menus, language string) string {
+func getMenu(menus Menus, language string) []MenuLink {
+	// switch language {
+	// case "zh":
+	// 	return strings.Join(menus.Zh, ", ")
+	// case "en":
+	// 	return strings.Join(menus.En, ", ")
+	// case "es":
+	// 	return strings.Join(menus.Es, ", ")
+	// default:
+	// 	return "Menu"
+	// }
+	// 	// 连接菜单项的名称
+	// names := make([]string, len(menuItems))
+	// for i, item := range menuItems {
+	// 	names[i] = item.Name
+	// }
+	// return strings.Join(names, ", ")
+
+	var menuItems []MenuLink
 	switch language {
 	case "zh":
-		return strings.Join(menus.Zh, ", ")
+		menuItems = menus.Zh
 	case "en":
-		return strings.Join(menus.En, ", ")
+		menuItems = menus.En
 	case "es":
-		return strings.Join(menus.Es, ", ")
+		menuItems = menus.Es
 	default:
-		return "Menu"
+		menuItems = []MenuLink{}
 	}
+	return menuItems
+
 }
 
 func getContents(contents Contents, language string) string {

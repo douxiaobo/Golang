@@ -51,7 +51,12 @@
     </head>
     <body>
         <header><h2>{{.Title}}</h2></header>
-        <nav>{{.Menu}}</nav>
+        <nav>
+            {{ $lang:=.User.Language}}
+            {{ range .Menu }}
+                <a class="menu-link" href="/{{ $lang }}/{{ .Link }}">{{ .Name }}</a>
+            {{ end }}
+        </nav>
         <main>{{.Content}}</main>
         <footer>
             {{ $url:=.User.ContentName }}
