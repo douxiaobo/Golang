@@ -20,6 +20,19 @@ type Website struct {
 	ContentName string
 	FooterLinks []FooterLink
 	CookieName  string
+	Travel      []TravelEntry
+}
+
+type TravelEntry struct {
+	Id      string `json:"Id"`
+	Date    string `json:"Date"`
+	Country string `json:"Country"`
+}
+
+type TravelData struct {
+	Zh []TravelEntry `json:"zh"`
+	En []TravelEntry `json:"en"`
+	Es []TravelEntry `json:"es"`
 }
 
 var user Website
@@ -120,15 +133,24 @@ func HandleFunc(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("Error processing menus: %v", err)
 	}
 
-	// 读取内容的JSON文件
-	contents, err := readAndParseContents(user.ContentName)
-	if err != nil {
-		log.Fatalf("Error processing contents: %v", err)
-	}
+	if user.ContentName == "travel" {
+		travelcontent, err := readAndParseTravelContents("travel")
+		if err != nil {
+			log.Fatalf("Error processing contents: %v", err)
+		}
+		user.Travel = getTravelContents(travelcontent, user.Language)
+	} else {
+		// 读取内容的JSON文件
+		contents, err := readAndParseContents(user.ContentName)
+		if err != nil {
+			log.Fatalf("Error processing contents: %v", err)
+		}
 
-	user.FooterLinks, err = readAndParseFooterLinks()
-	if err != nil {
-		log.Fatal("Error processing footer links: %v", err)
+		user.FooterLinks, err = readAndParseFooterLinks()
+		if err != nil {
+			log.Fatal("Error processing footer links: %v", err)
+		}
+		user.Content = getContents(contents, user.Language)
 	}
 
 	// 根据语言获取Title
@@ -137,25 +159,25 @@ func HandleFunc(w http.ResponseWriter, r *http.Request) {
 	// 根据语言获取Menu
 	user.Menu = getMenu(menus, user.Language)
 
-	user.Content = getContents(contents, user.Language)
-
 	t, err := template.ParseFiles("./public/tmpl/index1.html")
 	if err != nil {
 		fmt.Println("template parsefile failed, error:", err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		http.Error(w, "Internal Server Error1", http.StatusInternalServerError)
 		return
 	}
-	err = t.Execute(w, map[string]interface{}{
-		"Title":       user.Title,
-		"Menu":        user.Menu,
-		"Content":     user.Content,
-		"ContentName": user.ContentName,
-		"User":        user,
-		"FooterLinks": user.FooterLinks,
-	})
+	// err = t.Execute(w, map[string]interface{}{
+	// 	"Title":       user.Title,
+	// 	"Menu":        user.Menu,
+	// 	"Content":     user.Content,
+	// 	"ContentName": user.ContentName,
+	// 	"User":        user,
+	// 	"FooterLinks": user.FooterLinks,
+	// 	"Travel":      user.Travel,
+	// })
+	err = t.Execute(w, user)
 	if err != nil {
 		log.Println("Template execution error:", err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		http.Error(w, "Internal Server Error2", http.StatusInternalServerError)
 		return
 	}
 }
@@ -235,6 +257,27 @@ func readAndParseContents(name string) (Contents, error) {
 	return contents, nil
 }
 
+func readAndParseTravelContents(fileName string) (TravelData, error) {
+	file, err := os.Open(fmt.Sprintf("./public/json/%s.json", fileName))
+	if err != nil {
+		return TravelData{}, fmt.Errorf("error opening file: %w", err)
+	}
+	defer file.Close()
+
+	data, err := io.ReadAll(file)
+	if err != nil {
+		return TravelData{}, fmt.Errorf("error reading file: %w", err)
+	}
+
+	var travelData TravelData
+	err = json.Unmarshal(data, &travelData)
+	if err != nil {
+		return TravelData{}, fmt.Errorf("error unmarshalling json: %w", err)
+	}
+
+	return travelData, nil
+}
+
 func readAndParseFooterLinks() (FooterLinks, error) {
 	// 读取Footer.json文件
 	footerData, err := ioutil.ReadFile("./public/json/Footer.json")
@@ -298,6 +341,22 @@ func getContents(contents Contents, language string) string {
 	}
 }
 
+func getTravelContents(traveldata TravelData, language string) []TravelEntry {
+	var content []TravelEntry
+	switch language {
+	case "zh":
+		content = traveldata.Zh
+	case "en":
+		content = traveldata.En
+	case "es":
+		content = traveldata.Es
+	default:
+		content = traveldata.En // Default to English
+	}
+
+	return content
+}
+
 // 解析Accept-Language头部并返回最优先的语言
 func getLanguageFromHeader(header string) string {
 
@@ -314,9 +373,48 @@ func getLanguageFromHeader(header string) string {
 }
 
 func main() {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("Recovered in main: %v", r)
+		}
+	}()
 	user = Website{
 		CookieName: "preferred_language",
 	}
+	log.Println("Starting HTTP server...")
 	http.HandleFunc("/", HandleFunc)
-	http.ListenAndServe(":8080", nil)
+	if err := http.ListenAndServe(":8080", nil); err != nil {
+		log.Fatalf("ListenAndServe: %v", err)
+	}
+	// ln, err := net.Listen("tcp", ":0")
+	// if err != nil {
+	// 	log.Fatalf("Failed to listen: %v", err)
+	// }
+	// log.Printf("Server is listening on %s", ln.Addr())
+	// if err := http.Serve(ln, nil); err != nil {
+	// 	log.Fatalf("ListenAndServe: %v", err)
+	// }
 }
+
+// douxiaobo@192 Personal_Website_Go % go run main3.go
+// 2024/07/18 15:56:51 Starting HTTP server...
+// 2024/07/18 15:56:51 ListenAndServe: listen tcp :8080: bind: address already in use
+// exit status 1
+// douxiaobo@192 Personal_Website_Go % lsof -i :8080
+// COMMAND  PID      USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+// main3   4960 douxiaobo    3u  IPv6 0x624d3e8b6cf3a7e8      0t0  TCP *:http-alt (LISTEN)
+// main3   4960 douxiaobo    7u  IPv6 0xb17d9f4521718fb1      0t0  TCP localhost:http-alt->localhost:56382 (CLOSED)
+// main3   4960 douxiaobo    8u  IPv6 0xe8d415cc13afb679      0t0  TCP localhost:http-alt->localhost:56383 (CLOSED)
+// douxiaobo@192 Personal_Website_Go % kill 4960
+// douxiaobo@192 Personal_Website_Go %
+
+// douxiaobo@192 Personal_Website_Go % go run main3.go
+// 2024/07/18 16:04:16 Starting HTTP server...
+// 2024/07/18 16:04:16 ListenAndServe: listen tcp :8080: bind: address already in use
+// exit status 1
+// douxiaobo@192 Personal_Website_Go % lsof -i :8080
+// COMMAND  PID      USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+// main3   4960 douxiaobo    3u  IPv6 0x624d3e8b6cf3a7e8      0t0  TCP *:http-alt (LISTEN)
+// main3   4960 douxiaobo    7u  IPv6 0xb17d9f4521718fb1      0t0  TCP localhost:http-alt->localhost:56382 (CLOSED)
+// main3   4960 douxiaobo    8u  IPv6 0xe8d415cc13afb679      0t0  TCP localhost:http-alt->localhost:56383 (CLOSED)
+// douxiaobo@192 Personal_Website_Go % kill -9 4960
