@@ -74,6 +74,21 @@ type FooterLinks []FooterLink
 
 func HandleFunc(w http.ResponseWriter, r *http.Request) {
 	{
+
+		// if r.URL.Path != "/" {
+		// 	// user = Website{}
+		// 	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		// 	return
+		// }
+
+		// w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+
+		// w.Header().Set("Pragma", "no-cache")
+
+		// w.Header().Set("Expires", "0")
+
+		// fmt.Fprintf(w, "Debug: Redirect logic did not trigger for path: %s\n", r.URL.Path)
+
 		// 从URL路径中获取语言后缀
 		path := strings.TrimPrefix(r.URL.Path, "/")
 		pathParts := strings.Split(path, "/")
@@ -178,6 +193,8 @@ func HandleFunc(w http.ResponseWriter, r *http.Request) {
 	// fmt.Printf("Data passed to template: %+v\n", user)
 
 	// fmt.Printf("ContentName: %s\n", user.ContentName)
+
+	// fmt.Printf("Cookie: %s\n", user.CookieName)
 
 	if err = t.Execute(w, user); err != nil {
 		log.Println("Template execution error:", err)
