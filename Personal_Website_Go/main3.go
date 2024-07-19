@@ -174,12 +174,21 @@ func HandleFunc(w http.ResponseWriter, r *http.Request) {
 	// 	"FooterLinks": user.FooterLinks,
 	// 	"Travel":      user.Travel,
 	// })
-	err = t.Execute(w, user)
-	if err != nil {
+
+	// fmt.Printf("Data passed to template: %+v\n", user)
+
+	// fmt.Printf("ContentName: %s\n", user.ContentName)
+
+	if err = t.Execute(w, user); err != nil {
 		log.Println("Template execution error:", err)
 		http.Error(w, "Internal Server Error2", http.StatusInternalServerError)
 		return
 	}
+
+	// if user.ContentName == "travel" {
+	// 	fmt.Println("Travel:", user.Travel)
+	// 	fmt.Printf("Data passed to template: %v\n", user)
+	// }
 }
 
 func readAndParseTitles() (Titles, error) {

@@ -1,0 +1,48 @@
+<html lang="{{.Language}}">
+    <head>
+        <title>{{.Title}}</title>
+        <style>
+            /* 省略样式 */
+        </style>
+    </head>
+    <body>
+        <header><h2>{{.Title}}</h2></header>
+        <nav>
+            {{ $lang:=.Language}}
+            {{ range .Menu }}
+                <a class="menu-link" href="/{{ $lang }}/{{ .Link }}">{{ .Name }}</a>
+            {{ end }}
+        </nav>
+        <main>
+            <p>ContentName is: {{ .ContentName }}</p>
+            <p>Language is: {{ .Language }}</p>
+            <p>Title is: {{ .Title }}</p>
+            {{ if eq .ContentName "travel" }}
+                <p>Displaying Travel content</p>
+                <div id="travel-content">
+                    <table>
+                        {{ range .Travel }}
+                            <tr>
+                                <td>{{ .Id }}</td>
+                                <td>{{ .Date }}</td>
+                                <td>{{ .Country }}</td>
+                            </tr>
+                        {{ end }}
+                    </table>
+                </div>
+            {{ else }}
+                <p>Displaying general content</p>
+                <div id="general-content">
+                    {{ .Content }}
+                </div>
+            {{ end }}
+        </main>
+        <footer>
+            {{ $url:=.ContentName }}
+            {{ range .FooterLinks }}
+                <a class="footer-link" href="/{{.Code}}/{{ $url }}">{{.Name}}</a> 
+            {{ end }}
+            <p>&copy; 2024 by Dou Xiaobo. All rights reserved.</p>
+        </footer>
+    </body>
+</html>

@@ -70,8 +70,43 @@
             {{ end }}
         </nav>
         <main>
-            {{ if eq .ContentName "Travel" }}
+            <!-- <p>Language: {{ .Language }}</p> -->
+            <!-- <p>Title: {{ .Title }}</p> -->
+            <!-- <p>ContentName: {{ .ContentName }}</p> -->
+            <!-- <p>Travel: {{ .Travel }}</p> -->
+
+            <!-- {{ if eq .ContentName "Travel" }} -->
+                <!-- <p>ContentName is: {{ .ContentName }}</p> -->
+                <!-- <div id="travel-content"> -->
+                <!-- Your travel content goes here -->
+                <!-- <table> -->
+                    <!-- {{ range .Travel }} -->
+                        <!-- <tr> -->
+                            <!-- <td>{{ .Id }}</td> -->
+                            <!-- <td>{{ .Date }}</td> -->
+                            <!-- <td>{{ .Country }}</td> -->
+                        <!-- </tr> -->
+                    <!-- {{ end }} -->
+                <!-- </table> -->
+                <!-- </div> -->
+            <!-- {{ else }} -->
+                <!-- Display general content here -->
+                <!-- <div id="general-content"> -->
+                <!-- Your general content goes here -->
+                <!-- {{ .Content }} -->
+                <!-- </div> -->
+            <!-- {{ end }} -->
+
+
+            {{ if eq .ContentName "travel" }}       
+            <!-- 原来是travel，之前不能写Travel，导致网页内容不显示 -->
                 <!-- Display Travel specific content here -->
+                <!-- {{ $travel := .Travel }} -->
+                    <!-- {{ range $travel }} -->
+                        <!-- <p>Id: {{ .Id }}, Date: {{ .Date }}, Country: {{ .Country }}</p> -->
+                <!-- {{ end }} -->
+
+                <!-- <p>ContentName is: {{ .ContentName }}</p> -->
                 <div id="travel-content">
                     <!-- Your travel content goes here -->
                     <table>
@@ -82,7 +117,6 @@
                                 <td>{{ .Country }}</td>
                             </tr>
                         {{ end }}
-                        
                     </table>
                 </div>
             {{ else }}
