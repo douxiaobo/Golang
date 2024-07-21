@@ -10,6 +10,8 @@ import (
 	"os"
 	"strings"
 	"text/template"
+
+	"gopkg.in/yaml.v3"
 )
 
 type Website struct {
@@ -21,6 +23,12 @@ type Website struct {
 	FooterLinks []FooterLink
 	CookieName  string
 	Travel      []TravelEntry
+}
+
+type WorkContent struct {
+	Zh string `yaml:"zh"`
+	En string `yaml:"en"`
+	Es string `yaml:"es"`
 }
 
 type TravelEntry struct {
@@ -154,6 +162,12 @@ func HandleFunc(w http.ResponseWriter, r *http.Request) {
 			log.Fatalf("Error processing contents: %v", err)
 		}
 		user.Travel = getTravelContents(travelcontent, user.Language)
+	} else if user.ContentName == "work" {
+		workcontent, err := readAndParseWorkContents()
+		if err != nil {
+			log.Fatalf("Error processing work contents: %v", err)
+		}
+		user.Content = getWorkContent(workcontent, user.Language)
 	} else {
 		// 读取内容的JSON文件
 		contents, err := readAndParseContents(user.ContentName)
@@ -304,6 +318,22 @@ func readAndParseTravelContents(fileName string) (TravelData, error) {
 	return travelData, nil
 }
 
+func readAndParseWorkContents() (WorkContent, error) {
+	workFile, err := os.Open("./public/json/work.yaml")
+	if err != nil {
+		return WorkContent{}, fmt.Errorf("error opening file: %w", err)
+	}
+	defer workFile.Close()
+
+	var workContent WorkContent
+	decoder := yaml.NewDecoder(workFile)
+	err = decoder.Decode(&workContent)
+	if err != nil {
+		return WorkContent{}, fmt.Errorf("error decoding yaml: %w", err)
+	}
+	return workContent, nil
+}
+
 func readAndParseFooterLinks() (FooterLinks, error) {
 	// 读取Footer.json文件
 	footerData, err := ioutil.ReadFile("./public/json/Footer.json")
@@ -383,6 +413,19 @@ func getTravelContents(traveldata TravelData, language string) []TravelEntry {
 	return content
 }
 
+func getWorkContent(workcontent WorkContent, language string) string {
+	switch language {
+	case "zh":
+		return workcontent.Zh
+	case "en":
+		return workcontent.En
+	case "es":
+		return workcontent.Es
+	default:
+		return "Work Content"
+	}
+}
+
 // 解析Accept-Language头部并返回最优先的语言
 func getLanguageFromHeader(header string) string {
 
@@ -444,3 +487,28 @@ func main() {
 // main3   4960 douxiaobo    7u  IPv6 0xb17d9f4521718fb1      0t0  TCP localhost:http-alt->localhost:56382 (CLOSED)
 // main3   4960 douxiaobo    8u  IPv6 0xe8d415cc13afb679      0t0  TCP localhost:http-alt->localhost:56383 (CLOSED)
 // douxiaobo@192 Personal_Website_Go % kill -9 4960
+
+// # 初始化模块
+// go mod init github.com/douxiaobo/Personal_Website_Go
+
+// # 添加 yaml.v3 的依赖
+// go get gopkg.in/yaml.v3
+
+// # 确保依赖是最新的
+// go mod tidy
+
+// # 构建并运行你的程序
+// go run .
+
+// douxiaobo@192 Personal_Website_Go % go run main3.go
+// main3.go:14:2: no required module provides package gopkg.in/yaml.v3: go.mod file not found in current directory or any parent directory; see 'go help modules'
+// douxiaobo@192 Personal_Website_Go % go mod init personal_website
+// go: creating new go.mod: module personal_website
+// go: to add module requirements and sums:
+// 	go mod tidy
+// douxiaobo@192 Personal_Website_Go % go get gopkg.in/yaml.v3
+// go: added gopkg.in/yaml.v3 v3.0.1
+// douxiaobo@192 Personal_Website_Go % go mod tidy
+// go: downloading gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405
+// douxiaobo@192 Personal_Website_Go % go run main3.go
+// 2024/07/21 15:38:16 Starting HTTP server...
