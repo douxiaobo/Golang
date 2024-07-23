@@ -62,7 +62,9 @@
         </style>
     </head>
     <body>
-        <header><h2>{{.Title}}</h2></header>
+        <header style="display: block;">
+            <h2 style="display: inline;">{{.Title}} - Debug Check</h2>
+        </header>
         <nav>
             {{ $lang:=.Language}}
             {{ range .Menu }}

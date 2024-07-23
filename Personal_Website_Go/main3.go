@@ -49,6 +49,8 @@ type LanguageMap map[string]string
 
 var langrange = [...]string{"en", "zh", "es"}
 
+var containtlist = [...]string{"home", "about", "work", "travel", "music", "programming", "school", "sport"}
+
 // 定义一个结构体来匹配你的JSON数据结构
 type Titles struct {
 	Zh string `json:"zh"`
@@ -82,21 +84,6 @@ type FooterLinks []FooterLink
 
 func HandleFunc(w http.ResponseWriter, r *http.Request) {
 	{
-
-		// if r.URL.Path != "/" {
-		// 	// user = Website{}
-		// 	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
-		// 	return
-		// }
-
-		// w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
-
-		// w.Header().Set("Pragma", "no-cache")
-
-		// w.Header().Set("Expires", "0")
-
-		// fmt.Fprintf(w, "Debug: Redirect logic did not trigger for path: %s\n", r.URL.Path)
-
 		// 从URL路径中获取语言后缀
 		path := strings.TrimPrefix(r.URL.Path, "/")
 		pathParts := strings.Split(path, "/")
@@ -105,6 +92,10 @@ func HandleFunc(w http.ResponseWriter, r *http.Request) {
 		if len(pathParts) >= 2 {
 			user.Language = pathParts[0]
 			user.ContentName = pathParts[1]
+			if !(isValidLang(pathParts[0]) && isValidContentName(pathParts[1])) {
+				http.Error(w, "Invaid URL", http.StatusBadGateway)
+				return
+			}
 		} else {
 			// 尝试从cookie中获取语言设置
 			cookie, err := r.Cookie(user.CookieName)
@@ -188,38 +179,47 @@ func HandleFunc(w http.ResponseWriter, r *http.Request) {
 	// 根据语言获取Menu
 	user.Menu = getMenu(menus, user.Language)
 
+	// t, err := template.Must(template.ParseFiles("./public/tmpl/index1.html", "./public/tmpl/travel.html"))
+	// if err != nil {
+	// 	log.Fatalf("Failed to parse templates: %v", err)
+	// }
+	// if err = t.ExecuteTemplate(w, "index1.html", user); err != nil {
+	// 	log.Println("Template execution error:", err)
+	// 	http.Error(w, "Internal Server Error2", http.StatusInternalServerError)
+	// 	return
+	// }
 	t, err := template.ParseFiles("./public/tmpl/index1.html")
 	if err != nil {
 		fmt.Println("template parsefile failed, error:", err)
 		http.Error(w, "Internal Server Error1", http.StatusInternalServerError)
 		return
 	}
-	// err = t.Execute(w, map[string]interface{}{
-	// 	"Title":       user.Title,
-	// 	"Menu":        user.Menu,
-	// 	"Content":     user.Content,
-	// 	"ContentName": user.ContentName,
-	// 	"User":        user,
-	// 	"FooterLinks": user.FooterLinks,
-	// 	"Travel":      user.Travel,
-	// })
 
-	// fmt.Printf("Data passed to template: %+v\n", user)
-
-	// fmt.Printf("ContentName: %s\n", user.ContentName)
-
-	// fmt.Printf("Cookie: %s\n", user.CookieName)
+	// log.Println("User Title before rendering:", user.Title)
 
 	if err = t.Execute(w, user); err != nil {
 		log.Println("Template execution error:", err)
 		http.Error(w, "Internal Server Error2", http.StatusInternalServerError)
 		return
 	}
+}
 
-	// if user.ContentName == "travel" {
-	// 	fmt.Println("Travel:", user.Travel)
-	// 	fmt.Printf("Data passed to template: %v\n", user)
-	// }
+func isValidLang(lang string) bool {
+	for _, l := range langrange {
+		if lang == l {
+			return true
+		}
+	}
+	return false
+}
+
+func isValidContentName(contentName string) bool {
+	for _, c := range containtlist {
+		if contentName == c {
+			return true
+		}
+	}
+	return false
 }
 
 func readAndParseTitles() (Titles, error) {
@@ -363,7 +363,7 @@ func getTitle(titles Titles, language string) string {
 	case "es":
 		return titles.Es
 	default:
-		return "Title"
+		return titles.En // 默认使用英语
 	}
 }
 
@@ -455,14 +455,6 @@ func main() {
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatalf("ListenAndServe: %v", err)
 	}
-	// ln, err := net.Listen("tcp", ":0")
-	// if err != nil {
-	// 	log.Fatalf("Failed to listen: %v", err)
-	// }
-	// log.Printf("Server is listening on %s", ln.Addr())
-	// if err := http.Serve(ln, nil); err != nil {
-	// 	log.Fatalf("ListenAndServe: %v", err)
-	// }
 }
 
 // douxiaobo@192 Personal_Website_Go % go run main3.go

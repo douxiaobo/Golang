@@ -1,0 +1,19 @@
+{{ define "travel.html" }}
+<table>
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Date</th>
+            <th>Country</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{ range .travel }}
+        <tr>
+            <td>{{ .Id }}</td>
+            <td>{{ .Date }}</td>
+            <td>{{ .Country }}</td>
+        </tr>
+        {{ end }}
+    </tbody>
+</table>
