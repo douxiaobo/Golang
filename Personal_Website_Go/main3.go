@@ -82,6 +82,20 @@ type FooterLink struct {
 
 type FooterLinks []FooterLink
 
+type MarathonData struct {
+	Zh []MarathonEntry `json:"zh"`
+	En []MarathonEntry `json:"en"`
+	Es []MarathonEntry `json:"es"`
+}
+
+type MarathonEntry struct {
+	Id       string `json:"Id"`
+	Date     string `json:"Date"`
+	City     string `json:"City"`
+	Marathon string `json:"Marathon"`
+	Project  string `json:"Project"`
+}
+
 func HandleFunc(w http.ResponseWriter, r *http.Request) {
 	{
 		// 从URL路径中获取语言后缀
@@ -159,6 +173,12 @@ func HandleFunc(w http.ResponseWriter, r *http.Request) {
 			log.Fatalf("Error processing work contents: %v", err)
 		}
 		user.Content = getWorkContent(workcontent, user.Language)
+	} else if user.ContentName == "sport" {
+		sportcontent, err := readAndParseSportContents()
+		if err != nil {
+			log.Fatalf("Error processing sport contents: %v", err)
+		}
+		user.Content = sportcontent
 	} else {
 		// 读取内容的JSON文件
 		contents, err := readAndParseContents(user.ContentName)
@@ -179,15 +199,6 @@ func HandleFunc(w http.ResponseWriter, r *http.Request) {
 	// 根据语言获取Menu
 	user.Menu = getMenu(menus, user.Language)
 
-	// t, err := template.Must(template.ParseFiles("./public/tmpl/index1.html", "./public/tmpl/travel.html"))
-	// if err != nil {
-	// 	log.Fatalf("Failed to parse templates: %v", err)
-	// }
-	// if err = t.ExecuteTemplate(w, "index1.html", user); err != nil {
-	// 	log.Println("Template execution error:", err)
-	// 	http.Error(w, "Internal Server Error2", http.StatusInternalServerError)
-	// 	return
-	// }
 	t, err := template.ParseFiles("./public/tmpl/index1.html")
 	if err != nil {
 		fmt.Println("template parsefile failed, error:", err)
@@ -332,6 +343,62 @@ func readAndParseWorkContents() (WorkContent, error) {
 		return WorkContent{}, fmt.Errorf("error decoding yaml: %w", err)
 	}
 	return workContent, nil
+}
+
+func readAndParseSportContents() (string, error) {
+	marathon, err := os.Open("./public/json/marathon.json")
+	if err != nil {
+		return "", fmt.Errorf("error reading file: %w", err)
+	}
+	defer marathon.Close()
+
+	data, err := io.ReadAll(marathon)
+	if err != nil {
+		return "", fmt.Errorf("error reading file: %w", err)
+	}
+	var marathonDate MarathonData
+	err = json.Unmarshal(data, &marathonDate)
+	if err != nil {
+		return "", fmt.Errorf("error unmarshalling json: %w", err)
+	}
+
+	var content []MarathonEntry
+	switch user.Language {
+	case "zh":
+		content = marathonDate.Zh
+	case "en":
+		content = marathonDate.En
+	case "es":
+		content = marathonDate.Es
+	default:
+		content = marathonDate.En // 默认使用英语
+	}
+
+	var result strings.Builder
+	result.WriteString("<table border='1'>") // 添加表格边框
+
+	// 表头
+	result.WriteString("<thead><tr>")
+	for _, header := range []string{"Id", "Date", "City", "Marathon", "Project"} {
+		result.WriteString(fmt.Sprintf("<th>%s</th>", header))
+	}
+	result.WriteString("</tr></thead>")
+
+	// 数据行
+	result.WriteString("<tbody>")
+	for _, entry := range content {
+		result.WriteString("<tr>")
+		for _, value := range []string{entry.Id, entry.Date, entry.City, entry.Marathon, entry.Project} {
+			result.WriteString(fmt.Sprintf("<td>%s</td>", value))
+		}
+		result.WriteString("</tr>")
+	}
+	result.WriteString("</tbody>")
+
+	result.WriteString("</table>")
+
+	return result.String(), nil
+
 }
 
 func readAndParseFooterLinks() (FooterLinks, error) {

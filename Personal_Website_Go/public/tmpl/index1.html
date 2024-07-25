@@ -63,7 +63,7 @@
     </head>
     <body>
         <header style="display: block;">
-            <h2 style="display: inline;">{{.Title}} - Debug Check</h2>
+            <h1 style="display: inline;">{{.Title}}</h1>
         </header>
         <nav>
             {{ $lang:=.Language}}
@@ -73,7 +73,15 @@
         </nav>
         <main>
             {{ if eq .ContentName "travel" }}       
-            <!-- 原来是travel，之前不能写Travel，导致网页内容不显示 -->
+            <!-- 原来是travel，之前不能写Travel，导致网页内容不显示 --><header style="display: block;">
+            <h2 style="display: inline;">{{.Title}} - Debug Check</h2>
+        </header>
+        <nav>
+            {{ $lang:=.Language}}
+            {{ range .Menu }}
+                <a class="menu-link" href="/{{ $lang }}/{{ .Link }}">{{ .Name }}</a>
+            {{ end }}
+        </nav>
                 <div id="travel-content">
                     <!-- Your travel content goes here -->
                     <table>
