@@ -3,98 +3,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 	"text/template"
-
-	"gopkg.in/yaml.v3"
 )
-
-type Website struct {
-	Language    string
-	Title       string
-	Menu        []MenuLink
-	Content     string
-	ContentName string
-	FooterLinks []FooterLink
-	CookieName  string
-	Travel      []TravelEntry
-}
-
-type WorkContent struct {
-	Zh string `yaml:"zh"`
-	En string `yaml:"en"`
-	Es string `yaml:"es"`
-}
-
-type TravelEntry struct {
-	Id      string `json:"Id"`
-	Date    string `json:"Date"`
-	Country string `json:"Country"`
-}
-
-type TravelData struct {
-	Zh []TravelEntry `json:"zh"`
-	En []TravelEntry `json:"en"`
-	Es []TravelEntry `json:"es"`
-}
-
-var user Website
-
-type LanguageMap map[string]string
-
-var langrange = [...]string{"en", "zh", "es"}
-
-var containtlist = [...]string{"home", "about", "work", "travel", "music", "programming", "school", "sport"}
-
-// 定义一个结构体来匹配你的JSON数据结构
-type Titles struct {
-	Zh string `json:"zh"`
-	En string `json:"en"`
-	Es string `json:"es"`
-}
-
-type MenuLink struct {
-	Name string `json:"name"`
-	Link string `json:"link"`
-}
-
-type Menus struct {
-	Zh []MenuLink `json:"zh"`
-	En []MenuLink `json:"en"`
-	Es []MenuLink `json:"es"`
-}
-
-type Contents struct {
-	Zh string `json:"zh"`
-	En string `json:"en"`
-	Es string `json:"es"`
-}
-
-type FooterLink struct {
-	Code string `json:"code"` // 假设我们使用"code"作为JSON中的键，代表语言代码
-	Name string `json:"name"` // 假设我们使用"name"作为JSON中的键，代表语言名称
-}
-
-type FooterLinks []FooterLink
-
-type MarathonData struct {
-	Zh []MarathonEntry `json:"zh"`
-	En []MarathonEntry `json:"en"`
-	Es []MarathonEntry `json:"es"`
-}
-
-type MarathonEntry struct {
-	Id       string `json:"Id"`
-	Date     string `json:"Date"`
-	City     string `json:"City"`
-	Marathon string `json:"Marathon"`
-	Project  string `json:"Project"`
-}
 
 func HandleFunc(w http.ResponseWriter, r *http.Request) {
 	{
@@ -155,11 +69,17 @@ func HandleFunc(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("Error processing titles: %v", err)
 	}
 
+	// 根据语言获取Title
+	user.Title = getTitle(titles, user.Language)
+
 	// 读取Menu.json文件
 	menus, err := readAndParseMenus()
 	if err != nil {
 		log.Fatalf("Error processing menus: %v", err)
 	}
+
+	// 根据语言获取Menu
+	user.Menu = getMenu(menus, user.Language)
 
 	if user.ContentName == "travel" {
 		travelcontent, err := readAndParseTravelContents("travel")
@@ -185,19 +105,14 @@ func HandleFunc(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Fatalf("Error processing contents: %v", err)
 		}
-
-		user.FooterLinks, err = readAndParseFooterLinks()
-		if err != nil {
-			log.Fatal("Error processing footer links: %v", err)
-		}
 		user.Content = getContents(contents, user.Language)
+
 	}
 
-	// 根据语言获取Title
-	user.Title = getTitle(titles, user.Language)
-
-	// 根据语言获取Menu
-	user.Menu = getMenu(menus, user.Language)
+	user.FooterLinks, err = readAndParseFooterLinks()
+	if err != nil {
+		log.Fatal("Error processing footer links: %v", err)
+	}
 
 	t, err := template.ParseFiles("./public/tmpl/index1.html")
 	if err != nil {
@@ -233,174 +148,6 @@ func isValidContentName(contentName string) bool {
 	return false
 }
 
-func readAndParseTitles() (Titles, error) {
-	titleFile, err := os.Open("./public/json/Title.json")
-	if err != nil {
-		return Titles{}, fmt.Errorf("error opening file: %w", err)
-	}
-	defer titleFile.Close()
-
-	titleData, err := io.ReadAll(titleFile)
-	if err != nil {
-		return Titles{}, fmt.Errorf("error reading file: %w", err)
-	}
-
-	var titles Titles
-	err = json.Unmarshal(titleData, &titles)
-	if err != nil {
-		return Titles{}, fmt.Errorf("error unmarshalling json: %w", err)
-	}
-	return titles, nil
-}
-
-func readAndParseMenus() (Menus, error) {
-	menuFile, err := os.Open("./public/json/Menu.json")
-	if err != nil {
-		return Menus{}, fmt.Errorf("error opening file: %w", err)
-	}
-	defer menuFile.Close()
-
-	menuData, err := io.ReadAll(menuFile)
-	if err != nil {
-		return Menus{}, fmt.Errorf("error reading file: %w", err)
-	}
-
-	type TempMenu struct {
-		Zh []MenuLink `json:"zh"`
-		En []MenuLink `json:"en"`
-		Es []MenuLink `json:"es"`
-	}
-
-	// 将JSON数据反序列化到临时结构体
-	var tempMenus TempMenu
-	err = json.Unmarshal(menuData, &tempMenus)
-	if err != nil {
-		return Menus{}, fmt.Errorf("解析JSON出错: %w", err)
-	}
-
-	// 将临时结构体转换为Menus结构体
-	menus := Menus{
-		Zh: tempMenus.Zh,
-		En: tempMenus.En,
-		Es: tempMenus.Es,
-	}
-
-	return menus, nil
-}
-
-func readAndParseContents(name string) (Contents, error) {
-	contentFile, err := os.Open(fmt.Sprintf("./public/json/%s.json", name))
-	if err != nil {
-		return Contents{}, fmt.Errorf("error opening file: %w", err)
-	}
-	defer contentFile.Close()
-
-	contentData, err := io.ReadAll(contentFile)
-	if err != nil {
-		return Contents{}, fmt.Errorf("error reading file: %w", err)
-	}
-
-	var contents Contents
-	err = json.Unmarshal(contentData, &contents)
-	if err != nil {
-		return Contents{}, fmt.Errorf("error unmarshalling json: %w", err)
-	}
-	return contents, nil
-}
-
-func readAndParseTravelContents(fileName string) (TravelData, error) {
-	file, err := os.Open(fmt.Sprintf("./public/json/%s.json", fileName))
-	if err != nil {
-		return TravelData{}, fmt.Errorf("error opening file: %w", err)
-	}
-	defer file.Close()
-
-	data, err := io.ReadAll(file)
-	if err != nil {
-		return TravelData{}, fmt.Errorf("error reading file: %w", err)
-	}
-
-	var travelData TravelData
-	err = json.Unmarshal(data, &travelData)
-	if err != nil {
-		return TravelData{}, fmt.Errorf("error unmarshalling json: %w", err)
-	}
-
-	return travelData, nil
-}
-
-func readAndParseWorkContents() (WorkContent, error) {
-	workFile, err := os.Open("./public/json/work.yaml")
-	if err != nil {
-		return WorkContent{}, fmt.Errorf("error opening file: %w", err)
-	}
-	defer workFile.Close()
-
-	var workContent WorkContent
-	decoder := yaml.NewDecoder(workFile)
-	err = decoder.Decode(&workContent)
-	if err != nil {
-		return WorkContent{}, fmt.Errorf("error decoding yaml: %w", err)
-	}
-	return workContent, nil
-}
-
-func readAndParseSportContents() (string, error) {
-	marathon, err := os.Open("./public/json/marathon.json")
-	if err != nil {
-		return "", fmt.Errorf("error reading file: %w", err)
-	}
-	defer marathon.Close()
-
-	data, err := io.ReadAll(marathon)
-	if err != nil {
-		return "", fmt.Errorf("error reading file: %w", err)
-	}
-	var marathonDate MarathonData
-	err = json.Unmarshal(data, &marathonDate)
-	if err != nil {
-		return "", fmt.Errorf("error unmarshalling json: %w", err)
-	}
-
-	var content []MarathonEntry
-	switch user.Language {
-	case "zh":
-		content = marathonDate.Zh
-	case "en":
-		content = marathonDate.En
-	case "es":
-		content = marathonDate.Es
-	default:
-		content = marathonDate.En // 默认使用英语
-	}
-
-	var result strings.Builder
-	result.WriteString("<table border='1'>") // 添加表格边框
-
-	// 表头
-	result.WriteString("<thead><tr>")
-	for _, header := range []string{"Id", "Date", "City", "Marathon", "Project"} {
-		result.WriteString(fmt.Sprintf("<th>%s</th>", header))
-	}
-	result.WriteString("</tr></thead>")
-
-	// 数据行
-	result.WriteString("<tbody>")
-	for _, entry := range content {
-		result.WriteString("<tr>")
-		for _, value := range []string{entry.Id, entry.Date, entry.City, entry.Marathon, entry.Project} {
-			result.WriteString(fmt.Sprintf("<td>%s</td>", value))
-		}
-		result.WriteString("</tr>")
-	}
-	result.WriteString("</tbody>")
-
-	result.WriteString("</table>")
-
-	return result.String(), nil
-
-}
-
 func readAndParseFooterLinks() (FooterLinks, error) {
 	// 读取Footer.json文件
 	footerData, err := ioutil.ReadFile("./public/json/Footer.json")
@@ -420,82 +167,8 @@ func readAndParseFooterLinks() (FooterLinks, error) {
 	return footerJSON.Links, nil
 }
 
-// 获取标题
-func getTitle(titles Titles, language string) string {
-	switch language {
-	case "zh":
-		return titles.Zh
-	case "en":
-		return titles.En
-	case "es":
-		return titles.Es
-	default:
-		return titles.En // 默认使用英语
-	}
-}
-
-// 获取菜单
-func getMenu(menus Menus, language string) []MenuLink {
-	var menuItems []MenuLink
-	switch language {
-	case "zh":
-		menuItems = menus.Zh
-	case "en":
-		menuItems = menus.En
-	case "es":
-		menuItems = menus.Es
-	default:
-		menuItems = []MenuLink{}
-	}
-	return menuItems
-
-}
-
-func getContents(contents Contents, language string) string {
-	switch language {
-	case "zh":
-		return contents.Zh
-	case "en":
-		return contents.En
-	case "es":
-		return contents.Es
-	default:
-		return "Content"
-	}
-}
-
-func getTravelContents(traveldata TravelData, language string) []TravelEntry {
-	var content []TravelEntry
-	switch language {
-	case "zh":
-		content = traveldata.Zh
-	case "en":
-		content = traveldata.En
-	case "es":
-		content = traveldata.Es
-	default:
-		content = traveldata.En // Default to English
-	}
-
-	return content
-}
-
-func getWorkContent(workcontent WorkContent, language string) string {
-	switch language {
-	case "zh":
-		return workcontent.Zh
-	case "en":
-		return workcontent.En
-	case "es":
-		return workcontent.Es
-	default:
-		return "Work Content"
-	}
-}
-
 // 解析Accept-Language头部并返回最优先的语言
 func getLanguageFromHeader(header string) string {
-
 	langs := strings.Split(header, ",")
 	for _, lang := range langs {
 		trimmedLang := strings.TrimSpace(lang)
