@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"strings"
@@ -11,27 +12,38 @@ import (
 )
 
 type User struct {
-	language string
-	name     string
-	title    string
+	Language string
+	Name     string
+	Title    string
 }
 
 var languages_ranges = [...]string{"en", "zh-CN", "es"}
 
 func handleRequest(w http.ResponseWriter, r *http.Request) {
 	var user User
-	user.language = getLanguageFromHeader(r.Header.Get("Accept-Language"))
+	user.Language = getLanguageFromHeader(r.Header.Get("Accept-Language"))
 	var (
 		ctx  = gctx.New()
 		i18n = gi18n.New()
 	)
 
-	i18n.SetLanguage(user.language)
-	user.title = i18n.Translate(ctx, "title")
-	user.name = i18n.Translate(ctx, "name")
-	fmt.Fprintf(w, user.title)    //Welcome to my website!
-	fmt.Fprintf(w, user.name)     //Douxiaobao
-	fmt.Fprintf(w, user.language) //en,zh-CN;q=0.9,zh;q=0.8,es;q=0.7
+	i18n.SetLanguage(user.Language)
+	user.Title = i18n.Translate(ctx, "title")
+	user.Name = i18n.Translate(ctx, "name")
+
+	t, err := template.ParseFiles("templates/index.tmpl")
+	if err != nil {
+		fmt.Println("Template parsing error:", err)
+		return
+	}
+	if err := t.Execute(w, user); err != nil {
+		log.Println("Template execution error: ", err)
+		return
+	}
+
+	// fmt.Fprintf(w, user.title)    //Welcome to my website!
+	// fmt.Fprintf(w, user.name)     //Douxiaobao
+	// fmt.Fprintf(w, user.language) //en,zh-CN;q=0.9,zh;q=0.8,es;q=0.7
 
 }
 
