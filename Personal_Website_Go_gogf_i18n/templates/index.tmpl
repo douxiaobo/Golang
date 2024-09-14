@@ -6,6 +6,8 @@
     <title>{{.Title}}</title>
 </head>
 <body>
+    <!-- 引入 nav 模板 -->
+    {{template "nav" .}}
     <h1>{{.Title}}</h1>
     <p>Welcome, {{.Name}}!</p>
     <p>language is {{.Language}}.</p>

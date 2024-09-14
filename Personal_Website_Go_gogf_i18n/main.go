@@ -31,7 +31,8 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 	user.Title = i18n.Translate(ctx, "title")
 	user.Name = i18n.Translate(ctx, "name")
 
-	t, err := template.ParseFiles("templates/index.tmpl")
+	t, err := template.ParseFiles("templates/index.tmpl", "templates/nav.tmpl")
+	// t, err := template.ParseFiles("templates/index.tmpl")
 	if err != nil {
 		fmt.Println("Template parsing error:", err)
 		return
