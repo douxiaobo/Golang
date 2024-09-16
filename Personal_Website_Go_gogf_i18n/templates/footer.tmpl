@@ -1,11 +1,10 @@
 {{define "footer"}}
 
 <footer class="footer">
-    {{ $url:=ContentName }}
+    {{ $contentname:=.ContentName }}
     {{ range .FooterLinks }}
-        <a href="/{{.URL }}">{{.Name }}</a>
+        <a href="/{{.Footer_language_short }}/{{ $contentname }}">{{.Footer_language_long }}</a>
     {{ end }}
-
     <p>&copy; 2024 by Dou Xiaobo. All rights reserved.</p>
 </footer>
 

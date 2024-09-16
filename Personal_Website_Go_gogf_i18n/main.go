@@ -5,6 +5,8 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/gogf/gf/v2/i18n/gi18n"
@@ -20,52 +22,51 @@ type User struct {
 }
 
 type FooterLink struct {
-	Lang                  string
 	Footer_language_short string
 	Footer_language_long  string
 }
 
-var languages_ranges = [...]string{"en", "zh", "es"}
+var user User
+
+var err error
+
+type FooterLinks []FooterLink
+
+var (
+	ctx  = gctx.New()
+	i18n = gi18n.New()
+)
+
+var languages_ranges []string
 
 var containtlist = [...]string{"home", "about", "work", "travel", "music", "programming", "school", "sport"}
 
+func init() {
+	dirPath := "./i18n/"
+	files, err := os.ReadDir(dirPath)
+	if err != nil {
+		fmt.Println("Error reading directory:", err)
+		return
+	}
+
+	for _, file := range files {
+		if !file.IsDir() {
+			filename := strings.TrimSuffix(file.Name(), filepath.Ext(file.Name()))
+			languages_ranges = append(languages_ranges, filename)
+		}
+	}
+
+	// for _, name := range languages_ranges {
+	// 	fmt.Println(name)
+	// }
+
+}
+
 func handleRequest(w http.ResponseWriter, r *http.Request) {
-	var user User
+
 	// 从URL路径中获取语言后缀
 	path := strings.TrimPrefix(r.URL.Path, "/")
 	pathParts := strings.Split(path, "/")
-
-	// // 如果路径为空或仅为 "/"
-	// if len(pathParts) == 0 || (len(pathParts) == 1 && pathParts[0] == "") {
-	// 	// 设置默认语言和内容名称
-	// 	user.Language = getLanguageFromHeader(r.Header.Get("Accept-Language"))
-	// 	user.ContentName = "home"
-	// }
-
-	// // 如果路径中有足够的部分，那么第一部分是语言，第二部分是内容名称
-	// if len(pathParts) >= 2 {
-	// 	user.Language = pathParts[0]
-	// 	user.ContentName = pathParts[1]
-
-	// 	if !(isValidLang(pathParts[0]) || isValidContentName(pathParts[1])) {
-	// 		http.Error(w, "Invaid URL", http.StatusBadGateway)
-	// 		return
-	// 	}
-	// } else if len(pathParts) >= 2 && pathParts[1] == "" {
-	// 	user.Language = pathParts[0]
-	// 	user.ContentName = "home"
-	// } else if len(pathParts) == 1 {
-	// 	user.Language = pathParts[0]
-	// 	// 如果没有指定内容名称，默认使用home
-	// 	if !isValidLang(user.Language) {
-	// 		http.Error(w, "Invalid URL", http.StatusBadRequest)
-	// 		return
-	// 	}
-	// 	// user.ContentName = "home"
-	// } else {
-	// 	user.Language = getLanguageFromHeader(r.Header.Get("Accept-Language"))
-	// 	// user.ContentName = "home" // 这里替换为你的默认内容名称
-	// }
 
 	// 如果路径为空或仅为 "/"
 	if len(pathParts) == 0 || (len(pathParts) == 1 && pathParts[0] == "") {
@@ -96,14 +97,14 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var (
-		ctx  = gctx.New()
-		i18n = gi18n.New()
-	)
-
 	i18n.SetLanguage(user.Language)
 	user.Title = i18n.Translate(ctx, "title")
 	user.Name = i18n.Translate(ctx, "name")
+
+	user.FooterLinks, err = readAndParseFooterLinks()
+	if err != nil {
+		log.Fatal("Error processing footer links: %v", err)
+	}
 
 	// t, err := template.ParseFiles("templates/index.tmpl", "templates/nav.tmpl", "templates/header.tmpl", "templates/footer.tmpl")
 	// t, err := template.ParseFiles("templates/index.tmpl")
@@ -152,6 +153,20 @@ func isValidContentName(contentName string) bool {
 		}
 	}
 	return false
+}
+
+func readAndParseFooterLinks() (FooterLinks, error) {
+	var footerlinks []FooterLink
+	var footerlink FooterLink
+	for _, lang := range languages_ranges {
+		footerlink.Footer_language_short = lang
+		i18n.SetLanguage(lang)
+		footerlink.Footer_language_long = i18n.Translate(ctx, "language_full")
+		footerlinks = append(footerlinks, footerlink)
+	}
+	i18n.SetLanguage(user.Language)
+
+	return footerlinks, nil
 }
 
 func main() {
