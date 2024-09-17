@@ -1,0 +1,49 @@
+/* static/style.css */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+    color: #333;
+    text-align: center;
+}
+
+p {
+    color: #666;
+    text-align: center;
+    margin-top: 20px;
+}
+
+header {
+    background-color: #f8f9fa; /* 可以设置背景颜色 */
+    height: 6%; /* 占据10%的高度 */
+    background-color: aqua;
+    display: flex;
+    justify-content: center; /* 新增：水平居中 */
+    align-items: center; /* 新增：垂直居中 */
+}
+
+nav {
+    height: 2.5%; /* 示例中给导航栏预留5%的高度 */
+    background-color: aquamarine;
+    text-align: center;
+    justify-content: center; /* 新增：水平居中 */
+}
+
+main {
+    margin: 0 auto;
+    padding: 20px;
+    background-color: lightgreen;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+footer {
+    height: 2.5%; /* footer同样占据10%的高度 */
+    background-color: blanchedalmond;
+    display: flex;
+    justify-content: center; /* 新增：水平居中 */
+    align-items: center; /* 新增：垂直居中 */
+}

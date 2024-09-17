@@ -4,6 +4,7 @@
     {{ $contentname:=.ContentName }}
     {{ range .FooterLinks }}
         <a href="/{{.Footer_language_short }}/{{ $contentname }}">{{.Footer_language_long }}</a>
+    &nbsp;&nbsp;
     {{ end }}
     <p>&copy; 2024 by Dou Xiaobo. All rights reserved.</p>
 </footer>

@@ -1,16 +1,22 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{.Language}}">
 <head>
     <meta charset="UTF-8">
     <title>{{.Title}}</title>
+    <link rel="stylesheet" href="../static/style.css">
 </head>
 <body>
+
     {{template "header" .}}
+
     {{template "nav" .}}
-    <h1>{{.Title}}</h1>
-    <p>Welcome, {{.Name}}!</p>
-    <p>language is {{.Language}}.</p>
+
+    <main>
+        <p>This is {{.ContentName}}</p>
+    </main>
+    
+
     {{template "footer" .}}
+
 </body>
 </html>

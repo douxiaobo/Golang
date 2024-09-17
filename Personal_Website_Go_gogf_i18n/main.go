@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
@@ -17,6 +18,7 @@ type User struct {
 	Language    string
 	Name        string
 	Title       string
+	NavLinks    []NavLink
 	ContentName string
 	FooterLinks []FooterLink
 }
@@ -24,6 +26,11 @@ type User struct {
 type FooterLink struct {
 	Footer_language_short string
 	Footer_language_long  string
+}
+
+type NavLink struct {
+	Link_name string
+	Link_url  string
 }
 
 var user User
@@ -39,7 +46,11 @@ var (
 
 var languages_ranges []string
 
-var containtlist = [...]string{"home", "about", "work", "travel", "music", "programming", "school", "sport"}
+var containlist []string
+
+type ContentNames struct {
+	Names []string `json:"names"`
+}
 
 func init() {
 	dirPath := "./i18n/"
@@ -56,10 +67,15 @@ func init() {
 		}
 	}
 
-	// for _, name := range languages_ranges {
+	contentNames, err := readContentNamesFile("./content_names.json")
+	if err != nil {
+		log.Fatalf("Error reading content names file: %v", err)
+	}
+	containlist = contentNames.Names
+
+	// for _, name := range containlist {
 	// 	fmt.Println(name)
 	// }
-
 }
 
 func handleRequest(w http.ResponseWriter, r *http.Request) {
@@ -103,25 +119,23 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 
 	user.FooterLinks, err = readAndParseFooterLinks()
 	if err != nil {
-		log.Fatal("Error processing footer links: %v", err)
+		log.Fatalf("Error processing footer links: %v", err)
 	}
 
-	// t, err := template.ParseFiles("templates/index.tmpl", "templates/nav.tmpl", "templates/header.tmpl", "templates/footer.tmpl")
-	// t, err := template.ParseFiles("templates/index.tmpl")
-	t, err := template.ParseGlob("templates/*.tmpl")
+	user.NavLinks, err = readAndParseNavLinks()
+	if err != nil {
+		log.Fatalf("Error processing nav links: %v", err)
+	}
+
+	t, err := template.ParseGlob("templates/*.html")
 	if err != nil {
 		fmt.Println("Template parsing error:", err)
 		return
 	}
-	if err := t.ExecuteTemplate(w, "index.tmpl", user); err != nil {
+	if err := t.ExecuteTemplate(w, "index.html", user); err != nil {
 		log.Println("Template execution error: ", err)
 		return
 	}
-
-	// fmt.Fprintf(w, user.title)    //Welcome to my website!
-	// fmt.Fprintf(w, user.name)     //Douxiaobao
-	// fmt.Fprintf(w, user.language) //en,zh-CN;q=0.9,zh;q=0.8,es;q=0.7
-
 }
 
 func getLanguageFromHeader(header string) string {
@@ -147,7 +161,7 @@ func isValidLang(lang string) bool {
 }
 
 func isValidContentName(contentName string) bool {
-	for _, c := range containtlist {
+	for _, c := range containlist {
 		if contentName == c {
 			return true
 		}
@@ -169,12 +183,40 @@ func readAndParseFooterLinks() (FooterLinks, error) {
 	return footerlinks, nil
 }
 
+func readContentNamesFile(filePath string) (*ContentNames, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	var contentNames ContentNames
+	err = json.NewDecoder(file).Decode(&contentNames)
+	if err != nil {
+		return nil, err
+	}
+
+	return &contentNames, nil
+}
+
+func readAndParseNavLinks() ([]NavLink, error) {
+	var navlinks []NavLink
+	for _, name := range containlist {
+		navlink := NavLink{Link_name: i18n.Translate(ctx, name), Link_url: fmt.Sprintf("/%s/%s", user.Language, name)}
+		navlinks = append(navlinks, navlink)
+	}
+	return navlinks, nil
+}
+
 func main() {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Printf("Recovered in main: %v", r)
 		}
 	}()
+
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
+
 	log.Println("Starting HTTP server...")
 	http.HandleFunc("/", handleRequest)
 	if err := http.ListenAndServe(":8080", nil); err != nil {
