@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -19,6 +20,7 @@ type User struct {
 	Name        string
 	Title       string
 	NavLinks    []NavLink
+	Content     template.HTML
 	ContentName string
 	FooterLinks []FooterLink
 }
@@ -116,6 +118,27 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 	i18n.SetLanguage(user.Language)
 	user.Title = i18n.Translate(ctx, "title")
 	user.Name = i18n.Translate(ctx, "name")
+
+	if user.ContentName == "aboutme" && user.Language == "zh" {
+		file, err := os.Open(fmt.Sprintf("./content/%s_%s.html", user.ContentName, user.Language))
+		if err != nil {
+			log.Printf("Error opening content file: %v", err)
+			return
+		}
+		defer file.Close()
+		// 读取文件内容
+		contentBytes, err := io.ReadAll(file)
+		if err != nil {
+			log.Printf("Error reading content file: %v", err)
+			return // 同样处理错误
+		}
+
+		// 将内容转换为 template.HTML 类型
+		user.Content = template.HTML(contentBytes)
+	} else {
+		content := "<p>This is " + user.ContentName + "</p>"
+		user.Content = template.HTML(content)
+	}
 
 	user.FooterLinks, err = readAndParseFooterLinks()
 	if err != nil {
