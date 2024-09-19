@@ -54,6 +54,32 @@ type ContentNames struct {
 	Names []string `json:"names"`
 }
 
+type MarathonData struct {
+	Zh []MarathonEntry `json:"zh"`
+	En []MarathonEntry `json:"en"`
+	Es []MarathonEntry `json:"es"`
+}
+
+type MarathonEntry struct {
+	Id       string `json:"Id"`
+	Date     string `json:"Date"`
+	City     string `json:"City"`
+	Marathon string `json:"Marathon"`
+	Project  string `json:"Project"`
+}
+
+type TravelEntry struct {
+	Id      string `json:"Id"`
+	Date    string `json:"Date"`
+	Country string `json:"Country"`
+}
+
+type TravelData struct {
+	Zh []TravelEntry `json:"zh"`
+	En []TravelEntry `json:"en"`
+	Es []TravelEntry `json:"es"`
+}
+
 func init() {
 	dirPath := "./i18n/"
 	files, err := os.ReadDir(dirPath)
@@ -119,7 +145,19 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 	user.Title = i18n.Translate(ctx, "title")
 	user.Name = i18n.Translate(ctx, "name")
 
-	if user.ContentName == "aboutme" && user.Language == "zh" {
+	if user.ContentName == "travel" {
+		travelcontent, err := readAndParseTravelContents()
+		if err != nil {
+			log.Fatalf("Error processing contents: %v", err)
+		}
+		user.Content = template.HTML(travelcontent)
+	} else if user.ContentName == "sport" {
+		sportcontent, err := readAndParseSportContents()
+		if err != nil {
+			log.Fatalf("Error processing sport contents: %v", err)
+		}
+		user.Content = template.HTML(sportcontent)
+	} else if (user.ContentName == "aboutme" || user.ContentName == "work" || user.ContentName == "school") && user.Language == "zh" {
 		file, err := os.Open(fmt.Sprintf("./content/%s_%s.html", user.ContentName, user.Language))
 		if err != nil {
 			log.Printf("Error opening content file: %v", err)
@@ -159,6 +197,133 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 		log.Println("Template execution error: ", err)
 		return
 	}
+}
+
+func readAndParseTravelContents() (string, error) {
+	file, err := os.Open("./travel.json")
+	if err != nil {
+		return "", fmt.Errorf("error opening file: %w", err)
+	}
+	defer file.Close()
+
+	data, err := io.ReadAll(file)
+	if err != nil {
+		return "", fmt.Errorf("error reading file: %w", err)
+	}
+
+	var travelData TravelData
+	err = json.Unmarshal(data, &travelData)
+	if err != nil {
+		return "", fmt.Errorf("error unmarshalling json: %w", err)
+	}
+
+	var content []TravelEntry
+	switch user.Language {
+	case "zh":
+		content = travelData.Zh
+	case "en":
+		content = travelData.En
+	case "es":
+		content = travelData.Es
+	default:
+		content = travelData.En // 默认使用英语
+	}
+
+	var result strings.Builder
+	var thead bool = true                                                // 表头是否已输出
+	var tbody bool = true                                                // 数据行是否已输出
+	result.WriteString("<table border='1' style='text-align: center;'>") // 添加表格边框
+
+	for _, entry := range content {
+		if thead {
+			// 表头
+			result.WriteString("<thead><tr>")
+
+			for _, header := range []string{entry.Id, entry.Date, entry.Country} {
+				result.WriteString(fmt.Sprintf("<th>%s</th>", header))
+			}
+			result.WriteString("</tr></thead>")
+			thead = false
+		} else {
+			if tbody {
+				// 数据行
+				result.WriteString("<tbody>")
+				tbody = false
+			}
+
+			result.WriteString("<tr>")
+			for _, value := range []string{entry.Id, entry.Date, entry.Country} {
+				result.WriteString(fmt.Sprintf("<td>%s</td>", value))
+			}
+			result.WriteString("</tr>")
+		}
+	}
+	result.WriteString("</tbody>")
+	result.WriteString("</table>")
+	return result.String(), nil
+}
+
+func readAndParseSportContents() (string, error) {
+	marathon, err := os.Open("./marathon.json")
+	if err != nil {
+		return "", fmt.Errorf("error reading file: %w", err)
+	}
+	defer marathon.Close()
+
+	data, err := io.ReadAll(marathon)
+	if err != nil {
+		return "", fmt.Errorf("error reading file: %w", err)
+	}
+	var marathonDate MarathonData
+	err = json.Unmarshal(data, &marathonDate)
+	if err != nil {
+		return "", fmt.Errorf("error unmarshalling json: %w", err)
+	}
+
+	var content []MarathonEntry
+	switch user.Language {
+	case "zh":
+		content = marathonDate.Zh
+	case "en":
+		content = marathonDate.En
+	case "es":
+		content = marathonDate.Es
+	default:
+		content = marathonDate.En // 默认使用英语
+	}
+
+	var result strings.Builder
+	var thead bool = true                                                // 表头是否已输出
+	var tbody bool = true                                                // 数据行是否已输出
+	result.WriteString("<table border='1' style='text-align: center;'>") // 添加表格边框
+
+	for _, entry := range content {
+		if thead {
+			// 表头
+			result.WriteString("<thead><tr>")
+
+			for _, header := range []string{entry.Id, entry.Date, entry.City, entry.Marathon, entry.Project} {
+				result.WriteString(fmt.Sprintf("<th>%s</th>", header))
+			}
+			result.WriteString("</tr></thead>")
+			thead = false
+		} else {
+			if tbody {
+				// 数据行
+				result.WriteString("<tbody>")
+				tbody = false
+			}
+
+			result.WriteString("<tr>")
+			for _, value := range []string{entry.Id, entry.Date, entry.City, entry.Marathon, entry.Project} {
+				result.WriteString(fmt.Sprintf("<td>%s</td>", value))
+			}
+			result.WriteString("</tr>")
+		}
+	}
+	result.WriteString("</tbody>")
+	result.WriteString("</table>")
+	return result.String(), nil
 }
 
 func getLanguageFromHeader(header string) string {

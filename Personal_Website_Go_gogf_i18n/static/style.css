@@ -39,6 +39,16 @@ main {
     background-color: #99FF00;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     color:black;
+    text-align: center; /* 居中文本 */
+}
+
+table {
+    margin: 0 auto; /* 居中表格 */
+    width: 100%; /* 设置表格宽度 */
+}
+
+td, th {
+    text-align: center; /* 居中表格单元格 */
 }
 
 footer {

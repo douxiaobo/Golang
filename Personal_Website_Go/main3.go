@@ -111,7 +111,7 @@ func HandleFunc(w http.ResponseWriter, r *http.Request) {
 
 	user.FooterLinks, err = readAndParseFooterLinks()
 	if err != nil {
-		log.Fatal("Error processing footer links: %v", err)
+		log.Fatalf("Error processing footer links: %v", err)
 	}
 
 	t, err := template.ParseFiles("./public/tmpl/index1.html")

@@ -16,12 +16,12 @@
         {"Id":"5th","Date":"November 17, 2019","City":"Shanghai","Marathon":"2019 Shanghai Marathon","Project":"Full marathon"}
     ],
     "es":[
-        {"Id":"Secuencia","Fecha":"Fecha","Ciudad":"Ciudad","Maratón":"Maratón","Proyecto":"Proyecto"},
-        {"Id":"1er","Fecha":"29 de julio de 2018","Ciudad":"San Francisco","Maratón":"Maratón de San Francisco","Proyecto":"Maratón completo"},
-        {"Id":"2do","Fecha":"18 de noviembre de 2018","Ciudad":"Shanghai","Maratón":"Maratón de Shanghai 2018","Proyecto":"Maratón completo"},
-        {"Id":"3er","Fecha":"9 de diciembre de 2018","Ciudad":"Guangzhou","Maratón":"Maratón de Guangzhou 2019","Proyecto":"Maratón completo"},
-        {"Id":"4to","Fecha":"3 de noviembre de 2019","Ciudad":"Beijing","Maratón":"Maratón de Beijing 2019","Proyecto":"Maratón completo"},
-        {"Id":"5to","Fecha":"17 de noviembre de 2019","Ciudad":"Shanghai","Maratón":"Maratón de Shanghai 2019","Proyecto":"Maratón completo"}
+        {"Id":"Secuencia","Date":"Fecha","City":"Ciudad","Marathon":"Maratón","Project":"Proyecto"},
+        {"Id":"1er","Date":"29 de julio de 2018","City":"San Francisco","Marathon":"Maratón de San Francisco","Project":"Maratón completo"},
+        {"Id":"2do","Date":"18 de noviembre de 2018","City":"Shanghai","Marathon":"Maratón de Shanghai 2018","Project":"Maratón completo"},
+        {"Id":"3er","Date":"9 de diciembre de 2018","City":"Guangzhou","Marathon":"Maratón de Guangzhou 2019","Project":"Maratón completo"},
+        {"Id":"4to","Date":"3 de noviembre de 2019","City":"Beijing","Marathon":"Maratón de Beijing 2019","Project":"Maratón completo"},
+        {"Id":"5to","Date":"17 de noviembre de 2019","City":"Shanghai","Marathon":"Maratón de Shanghai 2019","Project":"Maratón completo"}
 
     ]
 }
