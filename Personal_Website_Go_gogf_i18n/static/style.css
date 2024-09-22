@@ -1,5 +1,9 @@
 /* static/style.css */
 body {
+    display:flex;
+    justify-content: center; /* 新增：水平居中 */
+    align-items: center; /* 新增：垂直居中 */
+    min-height: 100vh; /* 新增：设置最小高度为100vh */
     font-family: Arial, sans-serif;
     background-color: #f4f4f4;
     margin: 0;
@@ -34,12 +38,13 @@ nav {
 }
 
 main {
+    width:80%;
     margin: 0 auto;
     padding: 20px;
     background-color: #99FF00;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     color:black;
-    text-align: center; /* 居中文本 */
+    text-align: left; /* 居中文本 */
 }
 
 table {
