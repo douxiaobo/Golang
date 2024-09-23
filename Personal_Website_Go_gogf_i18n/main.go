@@ -157,7 +157,7 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 			log.Fatalf("Error processing sport contents: %v", err)
 		}
 		user.Content = template.HTML(sportcontent)
-	} else if (user.ContentName == "home" || user.ContentName == "aboutme" || user.ContentName == "work" || user.ContentName == "knowledge") && user.Language == "zh" {
+	} else if (user.ContentName == "home" || user.ContentName == "aboutme" || user.ContentName == "work" || user.ContentName == "learning") && user.Language == "zh" {
 		file, err := os.Open(fmt.Sprintf("./content/%s_%s.html", user.ContentName, user.Language))
 		if err != nil {
 			log.Printf("Error opening content file: %v", err)
