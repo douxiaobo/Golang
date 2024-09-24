@@ -39,15 +39,23 @@ nav {
     justify-content: center; /* 新增：水平居中 */
 }
 
-main {
+/* main {
 
     margin: 0 auto;
     padding: 20px;
     background-color: #99FF00;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     color:black;
-    text-align: left; /* 居中文本 */
-}
+    text-align: left; 居中文本 */
+/* } */
+
+.container {
+    width: 100%;
+    height: 100%;
+    /* Add your background pattern here */
+    background-image: linear-gradient(#ffffff 1.1rem, #ccc 1.2rem);
+    background-size: 100% 1.2rem;
+  }
 
 table {
     margin: 0 auto; /* 居中表格 */
@@ -67,30 +75,30 @@ footer {
 }
 
 button {
-    background-color: #eee;
-    border: none;
-    padding: 1rem;
-    font-size: 1rem;
-    width: 10em;
-    border-radius: 1rem;
-    color: lightcoral;
-    box-shadow: 0 0.4rem #dfd9d9;
-    cursor: pointer;
-   }
-   
-   button:active {
-    color: white;
-    box-shadow: 0 0.2rem #dfd9d9;
-    transform: translateY(0.2rem);
-   }
-   
-   button:hover:not(:disabled) {
-    background: lightcoral;
-    color: white;
-    text-shadow: 0 0.1rem #bcb4b4;
-   }
-   
-   button:disabled {
-    cursor: auto;
-    color: grey;
-   }
+    background-color: #eee;          /* 背景颜色 */
+    border: none;                    /* 移除边框 */
+    padding: 1rem;                   /* 内边距为1rem */
+    font-size: 1rem;                 /* 字体大小为1rem */
+    width: 10em;                     /* 宽度为10em */
+    border-radius: 1rem;             /* 圆角半径为1rem */
+    color: lightcoral;               /* 文字颜色为浅珊瑚色 */
+    box-shadow: 0 0.4rem #dfd9d9;    /* 添加阴影效果 */
+    cursor: pointer;                 /* 鼠标指针显示为手型 */
+}
+
+button:active {
+    color: white;                    /* 按下时文字颜色变为白色 */
+    box-shadow: 0 0.2rem #dfd9d9;    /* 按下时阴影变小 */
+    transform: translateY(0.2rem);   /* 按下时按钮向下移动0.2rem */
+}
+
+button:hover:not(:disabled) {
+    background: lightcoral;          /* 悬停时背景变为浅珊瑚色 */
+    color: white;                    /* 悬停时文字颜色变为白色 */
+    text-shadow: 0 0.1rem #bcb4b4;  /* 悬停时添加文字阴影 */
+}
+
+button:disabled {
+    cursor: auto;                    /* 禁用时鼠标指针显示为默认样式 */
+    color: grey;                     /* 禁用时文字颜色为灰色 */
+}

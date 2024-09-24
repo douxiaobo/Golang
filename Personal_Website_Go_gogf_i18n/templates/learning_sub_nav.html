@@ -1,10 +1,7 @@
-{{define "nav"}}
-
+{{ define "learning_sub_nav" }}
 <nav>
-    {{range .NavLinks}}
+    {{range .SubNavLinks}}
     <a href="{{.Link_url}}"><button>{{.Link_name}}</button></a>
     {{end}}
 </nav>
-
-
-{{end}}
+{{ end }}

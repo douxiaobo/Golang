@@ -7,17 +7,22 @@
     <link rel="stylesheet" href="../static/style.css">
 </head>
 <body>
-
-    {{template "header" .}}
-
-    {{template "nav" .}}
-
-    <main>
-        {{.Content}}
-    </main>
-    
-
-    {{template "footer" .}}
-
+    <div>
+        {{template "header" .}}
+    </div>
+    <div>
+        {{template "nav" .}}
+    </div>
+    <div>
+        <main class="container">
+            {{ if eq .ContentName "learning" }}
+                {{ template "learning_sub_nav" .}}
+            {{ end }}
+            {{.Content}}
+        </main>
+    </div>
+    <div>
+        {{template "footer" .}}
+    </div>
 </body>
 </html>

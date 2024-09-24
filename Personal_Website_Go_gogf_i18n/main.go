@@ -16,13 +16,15 @@ import (
 )
 
 type User struct {
-	Language    string
-	Name        string
-	Title       string
-	NavLinks    []NavLink
-	Content     template.HTML
-	ContentName string
-	FooterLinks []FooterLink
+	Language       string
+	Name           string
+	Title          string
+	NavLinks       []NavLink
+	SubNavLinks    []NavLink
+	Content        template.HTML
+	ContentName    string
+	SubContentName string
+	FooterLinks    []FooterLink
 }
 
 type FooterLink struct {
@@ -49,6 +51,8 @@ var (
 var languages_ranges []string
 
 var containlist []string
+
+var subcontainlist []string
 
 type ContentNames struct {
 	Names []string `json:"names"`
@@ -100,10 +104,6 @@ func init() {
 		log.Fatalf("Error reading content names file: %v", err)
 	}
 	containlist = contentNames.Names
-
-	// for _, name := range containlist {
-	// 	fmt.Println(name)
-	// }
 }
 
 func handleRequest(w http.ResponseWriter, r *http.Request) {
@@ -117,12 +117,16 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 		// 设置默认语言和内容名称
 		user.Language = getLanguageFromHeader(r.Header.Get("Accept-Language"))
 		user.ContentName = "home"
-	} else if len(pathParts) == 1 || len(pathParts) == 2 && pathParts[1] == "" {
+	} else if len(pathParts) == 1 || (len(pathParts) == 2 && pathParts[1] == "") {
 		user.Language = pathParts[0]
 		user.ContentName = "home"
-	} else if len(pathParts) == 2 {
+	} else if len(pathParts) == 2 || (len(pathParts) == 3 && pathParts[2] == "") {
 		user.Language = pathParts[0]
 		user.ContentName = pathParts[1]
+	} else if len(pathParts) == 3 || (len(pathParts) == 4 && pathParts[2] == "") {
+		user.Language = pathParts[0]
+		user.ContentName = pathParts[1]
+		user.SubContentName = pathParts[2]
 	} else {
 		http.Error(w, "Invalid URL", http.StatusBadRequest)
 		return
@@ -135,29 +139,57 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// 检查内容名称是否有效
 	if !isValidContentName(user.ContentName) {
 		user.ContentName = "home"
 		http.Redirect(w, r, fmt.Sprintf("/%s/%s", user.Language, user.ContentName), http.StatusMovedPermanently)
 		return
 	}
 
+	// if user.ContentName == "learning" && !isValidContentName(user.SubContentName) {
+	// 	user.SubContentName = "speaking"
+	// 	http.Redirect(w, r, fmt.Sprintf("/%s/%s/%s", user.Language, user.ContentName, user.SubContentName), http.StatusMovedPermanently)
+	// 	return
+	// }
+
 	i18n.SetLanguage(user.Language)
 	user.Title = i18n.Translate(ctx, "title")
 	user.Name = i18n.Translate(ctx, "name")
 
+	// 根据 ContentName 处理不同的内容
 	if user.ContentName == "travel" {
 		travelcontent, err := readAndParseTravelContents()
 		if err != nil {
 			log.Fatalf("Error processing contents: %v", err)
 		}
 		user.Content = template.HTML(travelcontent)
-	} else if user.ContentName == "sport" {
+	} else if user.ContentName == "sports" {
 		sportcontent, err := readAndParseSportContents()
 		if err != nil {
 			log.Fatalf("Error processing sport contents: %v", err)
 		}
 		user.Content = template.HTML(sportcontent)
-	} else if (user.ContentName == "home" || user.ContentName == "aboutme" || user.ContentName == "work" || user.ContentName == "learning") && user.Language == "zh" {
+	} else if user.ContentName == "learning" {
+		if user.SubContentName == "" {
+			user.SubContentName = "speaking"
+		}
+		file, err := os.Open(fmt.Sprintf("./content/%s_%s.html", user.SubContentName, user.Language))
+		if err != nil {
+			log.Printf("Error opening content file: %v", err)
+			return
+		}
+		defer file.Close()
+		// 读取文件内容
+		contentBytes, err := io.ReadAll(file)
+		if err != nil {
+			log.Printf("Error reading content file: %v", err)
+			return // 同样处理错误
+		}
+
+		// 将内容转换为 template.HTML 类型
+		user.Content = template.HTML(contentBytes)
+
+	} else if (user.ContentName == "home" || user.ContentName == "aboutme" || user.ContentName == "work") && user.Language == "zh" {
 		file, err := os.Open(fmt.Sprintf("./content/%s_%s.html", user.ContentName, user.Language))
 		if err != nil {
 			log.Printf("Error opening content file: %v", err)
@@ -186,6 +218,13 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 	user.NavLinks, err = readAndParseNavLinks()
 	if err != nil {
 		log.Fatalf("Error processing nav links: %v", err)
+	}
+
+	if user.ContentName == "learning" {
+		user.SubNavLinks, err = readAndParseSubNavLinks()
+		if err != nil {
+			log.Fatalf("Error processing sub nav links: %v", err)
+		}
 	}
 
 	t, err := template.ParseGlob("templates/*.html")
@@ -357,6 +396,15 @@ func isValidContentName(contentName string) bool {
 	return false
 }
 
+func isValidSubContentName(contentName string) bool {
+	for _, c := range subcontainlist {
+		if contentName == c {
+			return true
+		}
+	}
+	return false
+}
+
 func readAndParseFooterLinks() (FooterLinks, error) {
 	var footerlinks []FooterLink
 	var footerlink FooterLink
@@ -389,11 +437,32 @@ func readContentNamesFile(filePath string) (*ContentNames, error) {
 
 func readAndParseNavLinks() ([]NavLink, error) {
 	var navlinks []NavLink
+	var navlink NavLink
 	for _, name := range containlist {
-		navlink := NavLink{Link_name: i18n.Translate(ctx, name), Link_url: fmt.Sprintf("/%s/%s", user.Language, name)}
+		navlink = NavLink{Link_name: i18n.Translate(ctx, name), Link_url: fmt.Sprintf("/%s/%s", user.Language, name)}
 		navlinks = append(navlinks, navlink)
 	}
 	return navlinks, nil
+}
+
+func readAndParseSubNavLinks() ([]NavLink, error) {
+	var subnavlinks []NavLink
+
+	contentNames, err := readContentNamesFile("./" + user.ContentName + "_subnav.json")
+	if err != nil {
+		log.Fatalf("Error reading content names file: %v", err)
+	}
+	subcontainlist = contentNames.Names
+
+	// for _, name := range subcontainlist {
+	// 	fmt.Println(name)
+	// }
+
+	for _, name := range subcontainlist {
+		subnavlink := NavLink{Link_name: i18n.Translate(ctx, name), Link_url: fmt.Sprintf("/%s/%s/%s", user.Language, user.ContentName, name)}
+		subnavlinks = append(subnavlinks, subnavlink)
+	}
+	return subnavlinks, nil
 }
 
 func main() {
