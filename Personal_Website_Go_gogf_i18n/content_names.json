@@ -1,3 +1,4 @@
 {
-    "names": ["home", "aboutme", "work","travel","learning","sports"]
+    "names": ["home", "aboutme", "work","travel","learn"],
+    "names1":["sports"]
 }

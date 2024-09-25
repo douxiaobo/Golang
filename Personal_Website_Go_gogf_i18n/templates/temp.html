@@ -1,0 +1,132 @@
+ <!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+ 
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>无标题文档</title>
+    <style type="text/css">
+        * {
+            margin: 0;
+            padding: 0;
+        }
+ 
+        ul {
+            list-style: none;
+            display: flex;
+        }
+ 
+        /*横向菜单导航*/
+        .nav {
+            width: 980px;
+            /* 宽度980px */
+            margin: 20px;
+            /* 使div左右auto居中 */
+        }
+ 
+        .nav ul li {
+            position: relative;
+            /* 设置元素相对定位（关键） */
+            float: left;
+            /* 设置左浮动对齐 */
+            Width: 150px;
+            /* 宽度150px */
+            Height: 50px;
+            /* 高度50px */
+            flex: 1;
+        }
+ 
+        .nav ul li>a {
+            display: block;
+            /* 使元素变成块元素 */
+            width: 100%;
+            /* 宽度与父元素宽度一致 */
+            background: #000;
+            /* 背景颜色为白色 */
+            color: #fff;
+            /* 字体颜色为白色 */
+            font-size: 20px;
+            /* 字体大小为20px */
+            line-height: 50px;
+            /* 字体行高为50px */
+            text-align: center;
+            /* 文字居中 */
+        }
+ 
+        .nav ul li:hover>a {
+            background: #f00;
+            /* 鼠标经过背景变为红色 */
+        }
+ 
+        .nav dl {
+            display: none;
+            /* 初始设置不显示 */
+            position: absolute;
+            /* 相对于li元素进行绝对定位 */
+            left: 0;
+            /* 距离左侧0px */
+            top: 50px;
+            /* 距离顶部50px */
+            width: 100%;
+            /* 宽度与父元素宽度一样 */
+        }
+ 
+        .nav dl dd {
+            background: #999;
+            border-bottom: 1px solid #ccc;
+            /* 设置底部1px颜色#ccc的边框 */
+            text-align: center;
+        }
+ 
+        .nav al dd a {
+            display: block;
+            width: 100%;
+            color: #fff;
+            font-size: 16px;
+            line-height: 50px;
+            color: #fff;
+        }
+ 
+        .nav ul li:hover dl {
+            display: block;
+            /* 鼠标经过子菜单显示 */
+        }
+    </style>
+</head>
+ 
+<body>
+    <div class="nav">
+        <ul>
+            <li><a href="#">顶部导航1</a>
+                <dl>
+                    <dd><a href="#">子导航1-1</a></dd>
+                    <dd><a href="#">子导航1-2</a></dd>
+                    <dd><a href="#">子导航1-3</a></dd>
+                </dl>
+            </li>
+            <li><a href="#">顶部导航2</a>
+                <dl>
+                    <dd><a href="#">子导航2-1</a></dd>
+                    <dd><a href="#">子导航2-2</a></dd>
+                    <dd><a href="#">子导航2-3</a></dd>
+                </dl>
+            </li>
+            <li><a href="#">顶部导航3</a>
+                <dl>
+                    <dd><a href="#">子导航3-1</a></dd>
+                    <dd><a href="#">子导航3-2</a></dd>
+                    <dd><a href="#">子导航3-3</a></dd>
+                </dl>
+            </li>
+            <li><a href="#">顶部导航4</a>
+                <dl>
+                    <dd><a href="#">子导航4-1</a></dd>
+                    <dd><a href="#">子导航4-2</a></dd>
+                    <dd><a href="#">子导航4-3</a></dd>
+                </dl>
+            </li>
+        </ul>
+    </div>
+</body>
+ 
+</html>

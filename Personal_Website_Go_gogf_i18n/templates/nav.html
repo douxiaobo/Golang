@@ -1,10 +1,16 @@
 {{define "nav"}}
 
-<nav>
-    {{range .NavLinks}}
-    <a href="{{.Link_url}}"><button>{{.Link_name}}</button></a>
-    {{end}}
-</nav>
-
+<header>
+    <div style="width: 30%; text-align: center;" >
+        <a href="{{.Language}}/home"><h2>{{.Title}}</h2></a>
+    </div>
+    <div style="width:70%;">
+        <nav>
+            {{range .NavLinks}}
+                <a href="{{.Link_url}}"><button>{{.Link_name}}</button></a>
+            {{end}}
+        </nav>
+    </div>
+</header>
 
 {{end}}

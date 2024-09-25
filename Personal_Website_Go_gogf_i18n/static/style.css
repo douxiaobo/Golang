@@ -1,15 +1,15 @@
 /* static/style.css */
 body {
-    width: 90%; /* 设置宽度为90% */
-    margin:0 auto; /* 居中 */
-    min-height: 100vh;   /* 设置最小高度为100vh */
+  width: 95%; /* 设置宽度为90% */
+  margin:10px auto; /* 居中 */
+  min-height: 100vh;   /* 设置最小高度为100vh */
     /* display: flex; */
-    justify-content: center; /* 新增：水平居中 */
-    align-items: center; /* 新增：垂直居中 */
-    min-height: 100vh; /* 新增：设置最小高度为100vh */
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    padding: 0;
+  justify-content: center; /* 新增：水平居中 */
+  align-items: center; /* 新增：垂直居中 */
+  min-height: 100vh; /* 新增：设置最小高度为100vh */
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  padding: 1;   
 }
 
 h1 {
@@ -18,12 +18,16 @@ h1 {
 }
 
 p {
-    color: #666;
+    color: black;
     text-align: center;
     margin-top: 20px;
 }
 
+
 header {
+    border:2px solid red;
+    padding: 10px 40px;
+    border-radius: 20px 50px;       /* 新增：设置边框圆角为25px */
     background-color: #f8f9fa; /* 可以设置背景颜色 */
     height: 6%; /* 占据10%的高度 */
     background-color: aqua;
@@ -34,20 +38,9 @@ header {
 
 nav {
     height: 2.5%; /* 示例中给导航栏预留5%的高度 */
-    background-color: aquamarine;
     text-align: center;
     justify-content: center; /* 新增：水平居中 */
 }
-
-/* main {
-
-    margin: 0 auto;
-    padding: 20px;
-    background-color: #99FF00;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    color:black;
-    text-align: left; 居中文本 */
-/* } */
 
 .container {
     width: 100%;
@@ -66,7 +59,17 @@ td, th {
     text-align: center; /* 居中表格单元格 */
 }
 
+main {
+    border:5px dotted green;
+    padding: 10px 40px;
+    border-radius: 50px;
+    background-color: lightyellow; /* 可以设置背景颜色 */
+}
+
 footer {
+    border:2px solid blue;
+    padding: 10px 40px;
+    border-radius: 50px 20px;
     height: 2.5%; /* footer同样占据10%的高度 */
     background-color: blanchedalmond;
     display: flex;
@@ -102,3 +105,124 @@ button:disabled {
     cursor: auto;                    /* 禁用时鼠标指针显示为默认样式 */
     color: grey;                     /* 禁用时文字颜色为灰色 */
 }
+
+leftcolumn {
+    float:left;
+    width:25%;
+}
+rightcolumn {
+    float: right;
+    width:75%
+}
+
+
+
+
+
+
+.horzbar{
+    display: none;
+    background-color: var(--bg);
+    width: 42px;
+    height: 42px;
+    text-align: left;
+    margin-bottom: 10px;
+    border-radius: 7px 7px 0px 0px;
+  }
+  
+  .ellipses  {
+    color: var(--dark);
+    font-size: 2rem;
+    line-height: 2rem;
+    overflow: hidden;
+    text-align: left;
+    background-color: var(--bg);
+  }
+  
+  .btnpagenav {
+    display: flex;
+    font-weight: 400;
+    margin-left: 20px;
+    color: var(--black);
+    cursor: pointer;
+    width: 200px;
+    text-align: left;
+    font-size: 1rem;
+    line-height: 1.2rem;
+    height: 56px;
+    border-bottom: 1px solid var(--bg);
+    overflow: hidden;
+  }
+  
+  .pagenav{
+    overflow: unset;
+  }
+  
+  .btnpagenav:hover {
+    background-color: var(--medium);
+    color: var(--bg);
+  }
+  
+  .btnpagenav.selected {
+    background-color: var(--black);
+    color: var(--bg);
+  }
+  
+  ul {
+    list-style-type: none;
+  }
+  
+  li a {
+    display: flex;
+    padding-left: 15px;
+    align-items: center;
+    height: 54px;
+    color: var(--black);
+    font-size: 1rem;
+    font-weight: 400;
+    background-color: var(--lite);
+    width: 100%;
+    text-align: left;
+    list-style: none;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  
+  li a:hover {
+    background-color: var(--hover);
+  }
+  
+  li a.selected {
+    background-color: var(--medium);
+    color: var(--bg);
+  }
+  
+  @media screen and (max-width: 880px) {
+    .pagenav {
+      position: absolute;
+      display: none;
+      margin-left: 5px;
+    }
+  
+    .btnpagenav{
+      margin-left: 0px;
+    }
+  
+    .showsub{
+      display: flex;
+      left: 10px;
+      top: 50px;
+      background-color: var(--bg);
+      -webkit-box-shadow: 5px 5px 16px -4px rgba(0,0,0,0.7); 
+      box-shadow: 5px 5px 16px -4px rgba(0,0,0,0.7);
+      z-index: 3;
+    }
+  
+    .horzbar{
+      display: block;
+    }
+  
+    main{
+      top: 57px;
+    }
+  }

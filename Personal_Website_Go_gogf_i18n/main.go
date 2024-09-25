@@ -84,7 +84,15 @@ type TravelData struct {
 	Es []TravelEntry `json:"es"`
 }
 
+var tpl *template.Template
+
 func init() {
+
+	tpl = template.Must(template.ParseGlob("templates/*.html"))
+
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
+	http.Handle("/content", http.StripPrefix("/content/", http.FileServer(http.Dir("./content"))))
+
 	dirPath := "./i18n/"
 	files, err := os.ReadDir(dirPath)
 	if err != nil {
@@ -146,9 +154,10 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// if user.ContentName == "learning" && !isValidContentName(user.SubContentName) {
-	// 	user.SubContentName = "speaking"
-	// 	http.Redirect(w, r, fmt.Sprintf("/%s/%s/%s", user.Language, user.ContentName, user.SubContentName), http.StatusMovedPermanently)
+	// if user.ContentName == "learn" && !isValidSubContentName(user.SubContentName) {
+	// 	user.SubContentName = "speak"
+	// 	fmt.Println("Invalid sub content name, redirecting to speak")
+	// 	http.Redirect(w, r, fmt.Sprintf("/%s/%s", user.Language, user.ContentName), http.StatusMovedPermanently)
 	// 	return
 	// }
 
@@ -169,9 +178,9 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 			log.Fatalf("Error processing sport contents: %v", err)
 		}
 		user.Content = template.HTML(sportcontent)
-	} else if user.ContentName == "learning" {
+	} else if user.ContentName == "learn" {
 		if user.SubContentName == "" {
-			user.SubContentName = "speaking"
+			user.SubContentName = "speak"
 		}
 		file, err := os.Open(fmt.Sprintf("./content/%s_%s.html", user.SubContentName, user.Language))
 		if err != nil {
@@ -220,19 +229,14 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("Error processing nav links: %v", err)
 	}
 
-	if user.ContentName == "learning" {
+	if user.ContentName == "learn" {
 		user.SubNavLinks, err = readAndParseSubNavLinks()
 		if err != nil {
 			log.Fatalf("Error processing sub nav links: %v", err)
 		}
 	}
 
-	t, err := template.ParseGlob("templates/*.html")
-	if err != nil {
-		fmt.Println("Template parsing error:", err)
-		return
-	}
-	if err := t.ExecuteTemplate(w, "index.html", user); err != nil {
+	if err := tpl.ExecuteTemplate(w, "index.html", user); err != nil {
 		log.Println("Template execution error: ", err)
 		return
 	}
@@ -396,14 +400,14 @@ func isValidContentName(contentName string) bool {
 	return false
 }
 
-func isValidSubContentName(contentName string) bool {
-	for _, c := range subcontainlist {
-		if contentName == c {
-			return true
-		}
-	}
-	return false
-}
+// func isValidSubContentName(contentName string) bool {
+// 	for _, c := range subcontainlist {
+// 		if contentName == c {
+// 			return true
+// 		}
+// 	}
+// 	return false
+// }
 
 func readAndParseFooterLinks() (FooterLinks, error) {
 	var footerlinks []FooterLink
@@ -448,15 +452,11 @@ func readAndParseNavLinks() ([]NavLink, error) {
 func readAndParseSubNavLinks() ([]NavLink, error) {
 	var subnavlinks []NavLink
 
-	contentNames, err := readContentNamesFile("./" + user.ContentName + "_subnav.json")
+	contentNames, err := readContentNamesFile("./sub_" + user.ContentName + ".json")
 	if err != nil {
 		log.Fatalf("Error reading content names file: %v", err)
 	}
 	subcontainlist = contentNames.Names
-
-	// for _, name := range subcontainlist {
-	// 	fmt.Println(name)
-	// }
 
 	for _, name := range subcontainlist {
 		subnavlink := NavLink{Link_name: i18n.Translate(ctx, name), Link_url: fmt.Sprintf("/%s/%s/%s", user.Language, user.ContentName, name)}
@@ -471,8 +471,6 @@ func main() {
 			log.Printf("Recovered in main: %v", r)
 		}
 	}()
-
-	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 
 	log.Println("Starting HTTP server...")
 	http.HandleFunc("/", handleRequest)
